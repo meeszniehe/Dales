@@ -298,7 +298,7 @@ contains
           end if
 
           ! (SvdL, 16-05-2023:) take ratio of gradient Richardson number to critical Richardson number (equal to Prandtl in Smagorinsky-Lilly model)
-          RiRatio = min( grav/thvf(k) * dthvdz(i,j,k) / (2. * strain2 * Prandtl) , (1. - 0,00001) ) ! (SvdL, 16-05-2023:) dthvdz(i,j,k) already contains MO gradient at k=kmin (see modthermodynamics.f90)
+          RiRatio = min( grav/thvf(k) * dthvdz(i,j,k) / (2. * strain2 * Prandtl) , (1. - 0.00001) ) ! (SvdL, 16-05-2023:) dthvdz(i,j,k) already contains MO gradient at k=kmin (see modthermodynamics.f90)
 
           ekm(i,j,k)  = mlen ** 2. * sqrt(2. * strain2) * sqrt(1. - RiRatio)
           ekh(i,j,k)  = ekm(i,j,k) / Prandtl
