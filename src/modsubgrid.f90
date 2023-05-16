@@ -79,13 +79,6 @@ contains
       csz(:)  = cs
     end if
 
-    if(lmason) then
-      do k = 1,k1
-        mlen   = (1. / (csz(k) * delta(k))**nmason + 1. / (fkar * zf(k))**nmason)**(-1./nmason)
-        csz(k) = mlen / delta(k)
-      end do
-    end if
-
     if(lanisotrop) then
        ! Anisotropic diffusion scheme  https://doi.org/10.1029/2022MS003095
        ! length scale in TKE equation is delta z (private communication with Marat)
@@ -99,7 +92,6 @@ contains
           anis_fac (k) = 1.   !horizontal = vertical diffusion
        end do
     endif
-
 
     if (myid==0) then
       write (6,*) 'cf    = ',cf
@@ -216,23 +208,26 @@ contains
 !-----------------------------------------------------------------|
 
   use modglobal,   only : i1,j1,kmax,k1,ih,jh,i2,j2,delta,ekmin,grav,zf,fkar,deltai, &
-                          dxi,dyi,dzf,dzh
+                          dxi,dyi,dzf,dzh,zh ! (SvdL, 16-05-2023) added zh for Mason correction (only Smagorinsky closure)
   use modfields,   only : dthvdz,e120,u0,v0,w0,thvf,ksfc !cstep IBM
   use modsurfdata, only : dudz,dvdz,z0m
   use modmpi,      only : excjs
   implicit none
 
-  real    :: strain2,mlen
+  real    :: strain2,mlen,RiRatio
   integer :: i,j,k,kp,km,jp,jm,kmin !cibm
 
   if(lsmagorinsky) then
-    do k = 1,kmax
-      mlen        = csz(k) * delta(k)
-
+    do k = 1,kmax ! (SvdL, 16-05-2023:) potential to make this loop more efficient. No mixing length a/o Km required inside buildings. So only calculate when needed?
       do i = 2,i1
         do j = 2,j1
           strain2 = 0.
           kmin = ksfc(i,j)
+
+          ! (SvdL, 16-05-2023:) is this a valid approach, results in large horizontal variation of the mixing length: you do the same for MOSt (and Mason is intended to make profiles more MOST-consistent,)
+          if(lmason) then ! (SvdL, 16-05-2023:) moved this calculation to allow for horizontal variation of z0m(i,j), and use with IBM
+            mlen   = (1. / (csz(k) * delta(k))**nmason + 1. / (fkar * zf(k) - zh(kmin) + z0m(i,j))**nmason)**(-1./nmason)
+          end if
 
           kp=k+1
           km=k-1
@@ -302,7 +297,10 @@ contains
               (w0(i,jp,kp)-w0(i,j,kp))   *dyi        )**2    )
           end if
 
-          ekm(i,j,k)  = mlen ** 2. * sqrt(2. * strain2)
+          ! (SvdL, 16-05-2023:) take ratio of gradient Richardson number to critical Richardson number (equal to Prandtl in Smagorinsky-Lilly model)
+          RiRatio = min( grav/thvf(k) * dthvdz(i,j,k) / (2. * strain2 * Prandtl) , (1. - 0,00001) ) ! (SvdL, 16-05-2023:) dthvdz(i,j,k) already contains MO gradient at k=kmin (see modthermodynamics.f90)
+
+          ekm(i,j,k)  = mlen ** 2. * sqrt(2. * strain2) * sqrt(1. - RiRatio)
           ekh(i,j,k)  = ekm(i,j,k) / Prandtl
 
           ekm(i,j,k) = max(ekm(i,j,k),ekmin)

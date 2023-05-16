@@ -12,7 +12,7 @@ module modibm
                          z0m_wall
   implicit none
   save
-  public :: initibm, exitibm,applyibm, zerowallvelocity
+  public :: initibm, exitibm, applyibm, zerowallvelocity
 
   ! Fields
 
@@ -276,21 +276,21 @@ contains
     end if
 
     do k=1,kmax-ibm_adv_mask_kmax
-    do i=2,imax
-    do j=2,jmax
-       if (libm(i,j,k)) then
-          do ii=i-ibm_adv_mask_imax,i+ibm_adv_mask_imin
+      do i=2,imax
+        do j=2,jmax
+          if (libm(i,j,k)) then
+            do ii=i-ibm_adv_mask_imax,i+ibm_adv_mask_imin
              ibm_adv_mask(ii,j,k) = 1
-          enddo
-          do jj=j-ibm_adv_mask_imax,j+ibm_adv_mask_imin
+            enddo
+            do jj=j-ibm_adv_mask_imax,j+ibm_adv_mask_imin
              ibm_adv_mask(i,jj,k) = 1
-          enddo
-          do kk=k,k+ibm_adv_mask_kmin
+            enddo
+            do kk=k,k+ibm_adv_mask_kmin
              ibm_adv_mask(i,j,kk) = 1
-          enddo
-       endif
-    enddo
-    enddo
+            enddo
+          endif
+        enddo
+      enddo
     enddo
 
 
@@ -404,7 +404,8 @@ contains
                                up, vp, wp, thlp, qtp, e12p, svp, &
                                thl0av, qt0av
     use modglobal,      only : rk3step,   kmax, i1, j1, k1, ih, jh, rdt, timee, dx, dy, dzh, dzf, nsv, e12min
-    use modsubgriddata, only : ekm
+                          dxi,dyi,dzf,dzh,zh !
+    use modsubgriddata, only : ekm, lsmagorinsky ! (SvdL, 16-05-2023:) added switch for use of Smagorinsky closure
     use modmpi,         only : excjs
     !clater use modnudgeboundary, only : Nsim
 
@@ -426,6 +427,7 @@ contains
                !cstep run if lapply_ibm = true AND simid=1 without precursor simulation (so Nsim=1)
                !      or  if lapplY_ibm = true AND simid=2 with    precursor simulation (Nsim=2)
 
+    ! (SvdL, 16-05-2023:) comment/question: really set it to average at k=1? Options for future changes?
     thlibm = thl0av(1) !assumes inside air has the same temperature as the air outside
     qtibm  = qt0av (1) 
 
@@ -439,7 +441,7 @@ contains
     tempvp(:,:,:)=0.
     tempwp(:,:,:)=0.
 
-       do i=2,i1
+      do i=2,i1
         do j=2,j1
           do k=2,kmax          !cstep special treatment for k=1
 
@@ -587,21 +589,21 @@ contains
             empo = 0.25  * ( &
                 ekm(i,j+1,1)+ekm(i,j,1)+ekm(i-1,j,1)+ekm(i-1,j+1,1)  )
 
-              w_at_v_min  = 0.25*(w0(i-1,j+1,k+1)+w0(i-1,j,k+1))
-              w_at_v_plus = 0.25*(w0(i  ,j+1,k+1)+w0(i  ,j,k+1))
-              call log_wallaw(v0(i-1,j+1,k),w_at_v_min ,Cm_xwall,tau_vu_min)
-              call log_wallaw(v0(i,j+1,k)  ,w_at_v_plus,Cm_xwall,tau_vu_plus)
-              tempvp(i-1,j+1,k) = tempvp(i-1,j+1,k) - 0.5 * empo*((v0(i,j+1,k)-v0(i-1,j+1,k))/dx) / dx - 0.5 * tau_vu_min/dx
-              tempvp(i  ,j+1,k) = tempvp(i,j+1,k)   + 0.5 * empo*((v0(i,j+1,k)-v0(i-1,j+1,k))/dx) / dx - 0.5 * tau_vu_plus  /dx
+            w_at_v_min  = 0.25*(w0(i-1,j+1,k+1)+w0(i-1,j,k+1))
+            w_at_v_plus = 0.25*(w0(i  ,j+1,k+1)+w0(i  ,j,k+1))
+            call log_wallaw(v0(i-1,j+1,k),w_at_v_min ,Cm_xwall,tau_vu_min)
+            call log_wallaw(v0(i,j+1,k)  ,w_at_v_plus,Cm_xwall,tau_vu_plus)
+            tempvp(i-1,j+1,k) = tempvp(i-1,j+1,k) - 0.5 * empo*((v0(i,j+1,k)-v0(i-1,j+1,k))/dx) / dx - 0.5 * tau_vu_min/dx
+            tempvp(i  ,j+1,k) = tempvp(i,j+1,k)   + 0.5 * empo*((v0(i,j+1,k)-v0(i-1,j+1,k))/dx) / dx - 0.5 * tau_vu_plus  /dx
 
 
             call xwallscalar(i,j,1,thl0,tempthlp)
             call xwallscalar(i,j,1,qt0, tempqtp)
 
-              us_at_scalar_min  = 0.5 * ((v0(i-1,j,k) + v0(i-1,j+1,k))**2 + w0(i-1,j,k+1)**2)**0.5
-              us_at_scalar_plus = 0.5 * ((v0(i  ,j,k) + v0(i  ,j+1,k))**2 + w0(i  ,j,k+1)**2)**0.5
-              call bulk_wall_temp(us_at_scalar_min ,thlm(i-1,j,k),Cd_xwall,dx,tempthlp(i-1,j,k))
-              call bulk_wall_temp(us_at_scalar_plus,thlm(i  ,j,k),Cd_xwall,dx,tempthlp(i  ,j,k))
+            us_at_scalar_min  = 0.5 * ((v0(i-1,j,k) + v0(i-1,j+1,k))**2 + w0(i-1,j,k+1)**2)**0.5
+            us_at_scalar_plus = 0.5 * ((v0(i  ,j,k) + v0(i  ,j+1,k))**2 + w0(i  ,j,k+1)**2)**0.5
+            call bulk_wall_temp(us_at_scalar_min ,thlm(i-1,j,k),Cd_xwall,dx,tempthlp(i-1,j,k))
+            call bulk_wall_temp(us_at_scalar_plus,thlm(i  ,j,k),Cd_xwall,dx,tempthlp(i  ,j,k))
 
             do nc=1,nsv
               call xwallscalar(i,j,1,sv0(:,:,:,nc),tempsvp(:,:,:,nc))
@@ -623,22 +625,22 @@ contains
             epmo = 0.25  * ( &
               ekm(i+1,j,1)+ekm(i+1,j-1,1)+ekm(i,j-1,1)+ekm(i,j,1)  )
 
-             w_at_u_min  = 0.25*(w0(i+1,j-1,k+1)+w0(i,j-1,k+1))
-             w_at_u_plus = 0.25*(w0(i+1,j  ,k+1)+w0(i,j  ,k+1))
-             call log_wallaw(u0(i+1,j-1,k),w_at_u_min ,Cm_ywall,tau_uv_min)
-             call log_wallaw(u0(i+1,j  ,k),w_at_u_plus,Cm_ywall,tau_uv_plus)
+            w_at_u_min  = 0.25*(w0(i+1,j-1,k+1)+w0(i,j-1,k+1))
+            w_at_u_plus = 0.25*(w0(i+1,j  ,k+1)+w0(i,j  ,k+1))
+            call log_wallaw(u0(i+1,j-1,k),w_at_u_min ,Cm_ywall,tau_uv_min)
+            call log_wallaw(u0(i+1,j  ,k),w_at_u_plus,Cm_ywall,tau_uv_plus)
 
-             tempup(i+1,j-1,k) = tempup(i+1,j-1,k) - 0.5 * epmo * ((u0(i+1,j,k)-u0(i+1,j-1,k))/dy)/dy - 0.5 * tau_uv_min/dy
-             tempup(i+1,j,k)   = tempup(i+1,j,k)   + 0.5 * epmo * ((u0(i+1,j,k)-u0(i+1,j-1,k))/dy)/dy - 0.5 * tau_uv_plus/dy
+            tempup(i+1,j-1,k) = tempup(i+1,j-1,k) - 0.5 * epmo * ((u0(i+1,j,k)-u0(i+1,j-1,k))/dy)/dy - 0.5 * tau_uv_min/dy
+            tempup(i+1,j,k)   = tempup(i+1,j,k)   + 0.5 * epmo * ((u0(i+1,j,k)-u0(i+1,j-1,k))/dy)/dy - 0.5 * tau_uv_plus/dy
 
 
             call ywallscalar(i,j,1,thl0,tempthlp)
             call ywallscalar(i,j,1,qt0 ,tempqtp)
 
-             us_at_scalar_min  = 0.5 * ((u0(i,j-1,k) + u0(i+1,j-1,k))**2 + w0(i,j-1,k+1)**2)**0.5
-             us_at_scalar_plus = 0.5 * ((u0(i,j  ,k) + u0(i+1,j  ,k))**2 + w0(i,j  ,k+1)**2)**0.5
-             call bulk_wall_temp(us_at_scalar_min ,thlm(i,j-1,k),Cd_ywall,dy,tempthlp(i,j-1,k))
-             call bulk_wall_temp(us_at_scalar_plus,thlm(i,j  ,k),Cd_ywall,dy,tempthlp(i,j  ,k))
+            us_at_scalar_min  = 0.5 * ((u0(i,j-1,k) + u0(i+1,j-1,k))**2 + w0(i,j-1,k+1)**2)**0.5
+            us_at_scalar_plus = 0.5 * ((u0(i,j  ,k) + u0(i+1,j  ,k))**2 + w0(i,j  ,k+1)**2)**0.5
+            call bulk_wall_temp(us_at_scalar_min ,thlm(i,j-1,k),Cd_ywall,dy,tempthlp(i,j-1,k))
+            call bulk_wall_temp(us_at_scalar_plus,thlm(i,j  ,k),Cd_ywall,dy,tempthlp(i,j  ,k))
 
             do nc=1,nsv
               call ywallscalar(i,j,1,sv0(:,:,:,nc),tempsvp(:,:,:,nc))
@@ -712,8 +714,8 @@ contains
     return
   end subroutine applyibm
 
-
-  subroutine zerowallvelocity(simid) !<- MK: Forcd velocity at the immersed boundaries to 0 for a better interaction with the poissonsolver
+  ! (SvdL, 16-05-2023:) this function is currently unused (separately handled in applyibm above)
+  subroutine zerowallvelocity(simid) !<- MK: Force velocity at the immersed boundaries to 0 for a better interaction with the poissonsolver
 
     use modfields,      only : um, vm, wm, up, vp, wp
     use modglobal,      only : rk3step, kmax, i1, j1, k1, ih, jh, rdt
@@ -809,7 +811,7 @@ contains
     return
   end subroutine ywallscalar
 
-
+  ! (SvdL, 16-05-2023:) does this force e12 to zero at the wall or its flux? In normal surface model, the flux at bottom surface is assumed to be zero
   subroutine xwalle12(i,j,k)
 
     use modglobal,      only : dx2i, dx, dy, dzh
