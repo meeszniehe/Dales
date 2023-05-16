@@ -403,8 +403,7 @@ contains
                                u0, v0, w0, thl0, qt0, e120, sv0, &
                                up, vp, wp, thlp, qtp, e12p, svp, &
                                thl0av, qt0av
-    use modglobal,      only : rk3step,   kmax, i1, j1, k1, ih, jh, rdt, timee, dx, dy, dzh, dzf, nsv, e12min,
-                          dxi,dyi,dzf,dzh,zh !
+    use modglobal,      only : rk3step,   kmax, i1, j1, k1, ih, jh, rdt, timee, dx, dy, dzh, dzf, nsv, e12min
     use modsubgriddata, only : ekm!, lsmagorinsky ! (SvdL, 16-05-2023:) added switch for use of Smagorinsky closure
     use modmpi,         only : excjs
     !clater use modnudgeboundary, only : Nsim
