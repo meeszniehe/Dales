@@ -208,7 +208,7 @@ contains
 !-----------------------------------------------------------------|
 
   use modglobal,   only : i1,j1,kmax,k1,ih,jh,i2,j2,delta,ekmin,grav,zf,fkar,deltai, &
-                          dxi,dyi,dzf,dzh,zh ! (SvdL, 16-05-2023) added zh for Mason correction (only Smagorinsky closure)
+                          dxi,dyi,dzf,dzh ! (SvdL, 16-05-2023) added zh for Mason correction (only Smagorinsky closure)
   use modfields,   only : dthvdz,e120,u0,v0,w0,thvf,ksfc !cstep IBM
   use modsurfdata, only : dudz,dvdz,z0m
   use modmpi,      only : excjs
@@ -226,7 +226,7 @@ contains
 
           ! (SvdL, 16-05-2023:) is this a valid approach, results in large horizontal variation of the mixing length: you do the same for MOSt (and Mason is intended to make profiles more MOST-consistent,)
           if(lmason) then ! (SvdL, 16-05-2023:) moved this calculation to allow for horizontal variation of z0m(i,j), and use with IBM
-            mlen   = (1. / (csz(k) * delta(k))**nmason + 1. / (fkar * zf(k) - zh(kmin) + z0m(i,j))**nmason)**(-1./nmason)
+            mlen   = (1. / (csz(k) * delta(k))**nmason + 1. / (fkar * (zf(k) + z0m(i,j)))**nmason)**(-1./nmason)
           end if
 
           kp=k+1

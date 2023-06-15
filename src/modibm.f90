@@ -713,7 +713,6 @@ contains
     return
   end subroutine applyibm
 
-  ! (SvdL, 16-05-2023:) this function is currently unused (separately handled in applyibm above)
   subroutine zerowallvelocity(simid) !<- MK: Force velocity at the immersed boundaries to 0 for a better interaction with the poissonsolver
 
     use modfields,      only : um, vm, wm, up, vp, wp
