@@ -659,6 +659,10 @@ contains
               vp(i,j,k)=-vm(i,j,k)*rk3coefi
               wp(i,j,k)=-wm(i,j,k)*rk3coefi
               thlp(i,j,k)=(thlibm-thlm(i,j,k))*rk3coefi
+              if(isnan(thlp(i,j,k))) then
+                write(6,*) 'positie ijk', i,j,k
+                stop 'tendency ging nan' ! SvdL, added for testiing
+              endif
               qtp (i,j,k)=(qtibm -qtm(i,j,k))*rk3coefi
               e12p(i,j,k)=(e12min-e12m(i,j,k))*rk3coefi
               do nc=1,nsv
@@ -669,6 +673,10 @@ contains
               vp(i,j,k)=vp(i,j,k)+tempvp(i,j,k)
               wp(i,j,k)=wp(i,j,k)+tempwp(i,j,k)
               thlp(i,j,k)=thlp(i,j,k)+tempthlp(i,j,k)
+              if(isnan(thlp(i,j,k))) then
+                write(6,*) 'positie ijk', i,j,k
+                stop 'tendency ging nan' ! SvdL, added for testiing
+              endif
               qtp (i,j,k)=qtp (i,j,k)+tempqtp (i,j,k)
               do nc=1,nsv
                 svp (i,j,k,nc) = svp(i,j,k,nc) + tempsvp(i,j,k,nc)

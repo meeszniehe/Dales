@@ -231,7 +231,7 @@ SAVE
 
   ! Surface properties in case of prescribed conditions (previous isurf 2, 3 and 4)
   real              :: thls  = -1             !<  Surface liquid water potential temperature [K]
-  real              :: qts                    !<  Surface specific humidity [kg/kg]
+  real              :: qts   = 0.0            !<  Surface specific humidity [kg/kg], SvdL: also tentative change to prevent crash..
   real              :: thvs                   !<  Surface virtual temperature [K]
   real, allocatable :: svs   (:)              !<  Surface scalar concentration [-]
   real              :: z0    = -1             !<  Surface roughness length [m]

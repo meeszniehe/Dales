@@ -770,7 +770,7 @@ contains
 
 !> Calculates the interaction with the soil, the surface temperature and humidity, and finally the surface fluxes.
   subroutine surface
-    use modglobal,  only : i1,j1,fkar,zf,cu,cv,nsv,ijtot,rd,rv,rtimee,zh,dzf  !cibm
+    use modglobal,  only : i1,j1,fkar,zf,cu,cv,nsv,ijtot,rd,rv,rtimee,zh,dzf, lmoist  !cibm, SvdL: tentative add of lmoist
     use modfields,  only : thl0, qt0, u0, v0, u0av, v0av,ksfc                 !cibm
     use modmpi,     only : mpierr, comm3d, mpi_sum, excjs &
                          , D_MPI_ALLREDUCE, D_MPI_BCAST
@@ -912,7 +912,7 @@ contains
         enddo
       endif
 
-      call qtsurf    !computes saturated humidity qskin based on skin temperature (so could be roof temperature)
+      if(lmoist) call qtsurf    !computes saturated humidity qskin based on skin temperature (so could be roof temperature), SvdL tentative change to prevent crash..
 
     end if
 
@@ -959,6 +959,12 @@ contains
           thlflux(i,j) = - ( thl0(i,j,kmin) - tskin(i,j) ) / ra(i,j)   !cstep IBM
           qtflux(i,j) = - (qt0(i,j,kmin)  - qskin(i,j)) / ra(i,j)      !cstep IBM
 
+          if (abs(thlflux(i,j))>1000) then !SvdL, added for testing..
+            write(6,*) 'thflux knalt...'
+            write(6,*) 'thl0 en tskin zijn', thl0(i,j,kmin), tskin(i,j)
+            write(6,*) 'ra is', ra(i,j)
+            write(6,*) 'positie i,j,k', i,j,kmin
+          endif
 
           if(lhetero) then
             do n=1,nsv
@@ -1242,7 +1248,7 @@ contains
   subroutine getobl
     use modglobal, only : zf, rv, rd, grav, i1, j1, i2, j2, cu, cv, zh !cibm
     use modfields, only : thl0av, qt0av, u0, v0, thl0, qt0, u0av, v0av, ksfc !cibm
-    use modmpi,    only : mpierr,comm3d,mpi_sum,D_MPI_ALLREDUCE
+    use modmpi,    only : myid,mpierr,comm3d,mpi_sum,D_MPI_ALLREDUCE
     implicit none
 
     integer             :: i,j,iter,patchx,patchy, kmin !cibm
@@ -1282,6 +1288,12 @@ contains
             Rib = grav / thvs * z_MO * (thv - thvsl) / horv2
           endif
 
+          ! if(i==2 .and. j==2) then !SvdL, added for testing..
+          !   write(6,*) 'mpi-process', myid
+          !   write(6,*) 'current values going in are', thl0(i,j,kmin), tskin(i,j), qt0(i,j,kmin), qskin(i,j)
+          !   write(6,*) 'and these make', (1. + (rv/rd - 1.) * qt0(i,j,kmin)), (1. + (rv/rd - 1.) * qskin(i,j)), thv, thvsl
+          ! end if
+
           if (Rib == 0) then
              ! Rib can be 0 if there is no surface flux
              ! L is capped at 1e6 below, so use the same cap here
@@ -1289,7 +1301,14 @@ contains
              write(*,*) 'Obukhov length: Rib = 0 -> setting L=1e6'
           else
              iter = 0
+            !  write(6,*)'Current L value',obl(i,j)
              L = obl(i,j)
+
+            !  if (abs(obl(i,j))>1e5) then !SvdL, addes for testing..
+            !     write(6,*)'value of L too high: ',L, obl(i,j)
+            !     write(6,*)'current grid position i,j,kmin are: ',i, j,kmin
+            !     stop 'Obukhov length already too high!'
+            !  endif
 
              if(Rib * L < 0. .or. abs(L) == 1e5) then
                 if(Rib > 0) L = 0.01
@@ -1299,16 +1318,16 @@ contains
              do while (.true.)
                 iter    = iter + 1
                 Lold    = L
-!cibm                fx      = Rib - zf(1) / L * (log(zf(1) / z0h(i,j)) - psih(zf(1) / L) + psih(z0h(i,j) / L)) /&
-!cibm                     (log(zf(1) / z0m(i,j)) - psim(zf(1) / L) + psim(z0m(i,j) / L)) ** 2.
+                !cibm                fx      = Rib - zf(1) / L * (log(zf(1) / z0h(i,j)) - psih(zf(1) / L) + psih(z0h(i,j) / L)) /&
+                !cibm                     (log(zf(1) / z0m(i,j)) - psim(zf(1) / L) + psim(z0m(i,j) / L)) ** 2.
                 fx      = Rib - z_MO / L * (log(z_MO / z0h(i,j)) - psih(z_MO / L) + psih(z0h(i,j) / L)) /&
                      (log(z_MO / z0m(i,j)) - psim(z_MO / L) + psim(z0m(i,j) / L)) ** 2.
                 Lstart  = L - 0.001*L
                 Lend    = L + 0.001*L
-!cibm                fxdif   = ( (- zf(1) / Lstart * (log(zf(1) / z0h(i,j)) - psih(zf(1) / Lstart) + psih(z0h(i,j) / Lstart)) /&
-!cibm                     (log(zf(1) / z0m(i,j)) - psim(zf(1) / Lstart) + psim(z0m(i,j) / Lstart)) ** 2.) - (-zf(1) / Lend * &
-!cibm                     (log(zf(1) / z0h(i,j)) - psih(zf(1) / Lend) + psih(z0h(i,j) / Lend)) / (log(zf(1) / z0m(i,j)) - psim(zf(1) / Lend)&
-!cibm                     + psim(z0m(i,j) / Lend)) ** 2.) ) / (Lstart - Lend)
+                !cibm                fxdif   = ( (- zf(1) / Lstart * (log(zf(1) / z0h(i,j)) - psih(zf(1) / Lstart) + psih(z0h(i,j) / Lstart)) /&
+                !cibm                     (log(zf(1) / z0m(i,j)) - psim(zf(1) / Lstart) + psim(z0m(i,j) / Lstart)) ** 2.) - (-zf(1) / Lend * &
+                !cibm                     (log(zf(1) / z0h(i,j)) - psih(zf(1) / Lend) + psih(z0h(i,j) / Lend)) / (log(zf(1) / z0m(i,j)) - psim(zf(1) / Lend)&
+                !cibm                     + psim(z0m(i,j) / Lend)) ** 2.) ) / (Lstart - Lend)
                 fxdif   = ( (- z_MO / Lstart * (log(z_MO / z0h(i,j)) - psih(z_MO / Lstart) + psih(z0h(i,j) / Lstart)) /&
                      (log(z_MO / z0m(i,j)) - psim(z_MO / Lstart) + psim(z0m(i,j) / Lstart)) ** 2.) - (-z_MO / Lend * &
                      (log(z_MO / z0h(i,j)) - psih(z_MO / Lend) + psih(z0h(i,j) / Lend)) / (log(z_MO / z0m(i,j)) - psim(z_MO / Lend)&
@@ -1320,7 +1339,11 @@ contains
                    if(Rib < 0) L = -0.01
                 end if
                 if(abs((L - Lold)/L) < 1e-4) exit
-                if(iter > 1000) stop 'Obukhov length calculation does not converge!'
+                if(iter > 1000) then !SvdL, added print statement for testing..
+                  write(6,*)'initial Lold is: ',Lold
+                  write(6,*)'current grid position i,j,kmin are: ',i, j,kmin
+                  stop 'Obukhov length calculation does not converge!'
+                end if
              end do
 
              if (abs(L)>1e6) L = sign(1.0e6,L)
@@ -1459,7 +1482,7 @@ contains
              if(Rib < 0) L = -0.01
           end if
           if(abs((L - Lold)/L) < 1e-4) exit
-          if(iter > 1000) stop 'Obukhov length calculation does not converge!'
+          if(iter > 1000) stop 'Global Obukhov length calculation does not converge!'
        end do
 
        if (abs(L)>1e6) L = sign(1.0e6,L)

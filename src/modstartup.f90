@@ -421,7 +421,8 @@ contains
                                   zf,dzf,dzh,rv,rd,cp,rlv,pref0,om23_gs,&
                                   ijtot,cu,cv,e12min,dzh,cexpnr,ifinput,lwarmstart,ltotruntime,itrestart,&
                                   trestart, ladaptive,llsadv,tnextrestart,longint,&
-                                  imax,jmax !cibm cstep  local emissions
+                                  imax,jmax,& !cibm cstep  local emissions
+                                  lmoist !SvdL, tetnative add to prevent crash
     use modsubgrid,        only : ekm,ekh
     use modsurfdata,       only : wsvsurf, &
                                   thls,tskin,tskinm,tsoil,tsoilm,phiw,phiwm,Wl,Wlm,thvs,qts,isurf,svs,obl,oblav,&
@@ -726,7 +727,7 @@ contains
       obl   = -0.1
       oblav = -0.1
 
-      call qtsurf
+      if(lmoist) call qtsurf  !SvdL, tentative change to prevent crash..
 
       dthldz = (thlprof(1) - thls)/zf(1)
       thvs = thls * (1. + (rv/rd - 1.) * qts)

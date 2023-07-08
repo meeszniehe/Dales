@@ -182,7 +182,7 @@ end subroutine tstep_update
 subroutine tstep_integrate
 
 
-  use modglobal, only : rdt,rk3step,e12min,i1,j1,k1
+  use modglobal, only : rdt,rk3step,e12min,i1,j1,k1, lmoist !SvdL, tentative change to prevent crash..
   use modfields, only : u0,um,up,v0,vm,vp,w0,wm,wp,&
                         thl0,thlm,thlp,qt0,qtm,qtp,&
                         e120,e12m,e12p,sv0,svm,svp
@@ -194,12 +194,15 @@ subroutine tstep_integrate
 
   rk3coef = rdt / (4. - dble(rk3step))
 
+    qt0 = 0.
+    qtm = 0.
+
   if(rk3step /= 3) then
      u0   = um   + rk3coef * up
      v0   = vm   + rk3coef * vp
      w0   = wm   + rk3coef * wp
      thl0 = thlm + rk3coef * thlp
-     qt0  = qtm  + rk3coef * qtp
+     if(lmoist) qt0  = qtm  + rk3coef * qtp !SvdL, added this for testing
      sv0  = svm  + rk3coef * svp
      e120 = max(e12min,e12m + rk3coef * e12p)
   else ! step 3 - store result in both ..0 and ..m
@@ -211,8 +214,8 @@ subroutine tstep_integrate
      w0 = wm
      thlm = thlm + rk3coef * thlp
      thl0 = thlm
-     qtm  = qtm  + rk3coef * qtp
-     qt0  = qtm
+     if(lmoist) qtm  = qtm  + rk3coef * qtp !SvdL, added this for testing
+     if(lmoist) qt0  = qtm                  !SvdL, added this for testing
      svm  = svm  + rk3coef * svp
      sv0 = svm
      e12m = max(e12min,e12m + rk3coef * e12p)
