@@ -46,7 +46,7 @@ subroutine advection
   integer :: n
 
   ! leq = .false. ! for testing that the non-uniform advection routines agree with the uniform ones
-                  ! when the grid is uniform
+                  ! when the grid is uniform.
   
   select case(iadv_mom)
     case(iadv_cd2)
