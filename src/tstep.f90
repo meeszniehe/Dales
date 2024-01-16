@@ -187,6 +187,7 @@ subroutine tstep_integrate
                         thl0,thlm,thlp,qt0,qtm,qtp,&
                         e120,e12m,e12p,sv0,svm,svp
   use modibmdata,        only : libm
+  use modtreesdata,      only : ltree_stem
   implicit none
   integer:: i,j,k
 
