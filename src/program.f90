@@ -158,6 +158,10 @@ program DALES
   use modibm,          only : applyibm, exitibm, zerowallvelocity ! cstep cibm 
   use modibmdata,      only : libm,lpoislast !cstep cibm 
 
+  ! Drag for single trees
+  use modtrees,        only : applytrees, exittrees
+  use modtreesdata,    only : ltree_stem !, ltree_leaves
+
     !cstep  the following modules are needed if the concurrent precursor method is applied
   use modnudgeboundary, only : initnudgeboundary, nudgeboundary, exitnudgeboundary, lnudgeboundary !PVD
 
@@ -280,6 +284,8 @@ program DALES
   enddo
   enddo
 
+    call applytrees !Trees present, represent them by drag value
+
     !< MK: Ordering of the Poisson Solver and the IBM, (lpoislast==.true.): 
            !IBM -> Pois, (lpoislast==.false.): zerowallvelocity -> Pois -> IBM
     !< MK: If lapply_ibm is not defined or set to .false., the Immersed boundary functions will not be applied
@@ -368,6 +374,7 @@ program DALES
   call exitradfield
   call exitheterostats
   call exitcanopy
+  call exittrees ! close variable for trees
   call exittimestat
   call exitmodules
   call exitnudgeboundary  !cstep
