@@ -92,6 +92,7 @@ contains
                                 , D_MPI_BCAST
     use modchem,           only : initchem
     use modibm,            only : initibm !cstep IBM
+    use modtrees,          only : inittrees
     use modversion,        only : git_version
 
     implicit none
@@ -281,6 +282,7 @@ contains
 
     call initibm        !MK Initialize for IBM !cstep should be called before initsurface
                         !cstep IBM here ibas_prf will be changed to 2 if ibm is applied
+    call inittrees
 
     call initboundary
     call initthermodynamics
@@ -331,6 +333,7 @@ contains
     use modmpi,    only : myid,nprocx,nprocy,mpierr, MPI_FINALIZE
     use modtimedep, only : ltimedep
     use modibmdata, only : lapply_ibm !cibm
+    use modtreesdata, only : lapply_trees
     use modsampdata, only : lsampibm
 
 
@@ -436,6 +439,7 @@ contains
     use modtestbed,        only : ltestbed,tb_ps,tb_thl,tb_qt,tb_u,tb_v,tb_w,tb_ug,tb_vg,&
                                   tb_dqtdxls,tb_dqtdyls,tb_qtadv,tb_thladv
     use modibmdata,        only : libm, thlibm, lapply_ibm
+    use modtreesdata,      only : ltree_stem, lapply_trees
 
     integer i,j,k,n,ierr
     logical negval !switch to allow or not negative values in randomnization
