@@ -30,7 +30,7 @@ module modtrees
         integer                 :: i, j, k, ierr, ii, jj, kk, n     !< initialize integer to loop over
         integer, allocatable    :: kindex_stem(:,:)                      !< index of stem height
         character(100)          :: readstring                       !< read files as text
-
+            
         namelist/NAMTREES/ lapply_trees, lreadfile_trees, C_stem, A_stem 
 
         if(myid==0) then 
@@ -40,8 +40,8 @@ module modtrees
                 print *, 'Problem in namoptions NAMTREES'
                 print *, 'iostat error: ', ierr
                 backspace(ifnamopt)
-                read(ifnamopt,fmt='(A)') line
-                print *, 'Invalid line: '//trim(line)
+                read(ifnamopt,fmt='(A)') readstring
+                print *, 'Invalid line: '//trim(readstring)
                 stop 'ERROR: Problem in namoptions NAMTREES'
             endif
             write(6 ,NAMTREES)
