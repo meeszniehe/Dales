@@ -34,11 +34,14 @@ module modtrees
         namelist/NAMTREES/ lapply_trees, lreadfile_trees, C_stem, A_stem 
 
         if(myid==0) then 
-            open(ifnamopt,file=fname_options,status='old',iostat=ierr) ! fname_options='namoptions'
+            open(ifnamopt,file=fname_options,status='old',iostat=ierr) ! fname_options='namoptions', iostat=0 if operation is successful, otherwise non-zero value
             read(ifnamopt,NAMTREES,iostat=ierr)
             if (ierr > 0) then
                 print *, 'Problem in namoptions NAMTREES'
                 print *, 'iostat error: ', ierr
+                backspace(ifnamopt)
+                read(ifnamopt,fmt='(A)') line
+                print *, 'Invalid line: '//trim(line)
                 stop 'ERROR: Problem in namoptions NAMTREES'
             endif
             write(6 ,NAMTREES)
