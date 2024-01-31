@@ -92,7 +92,7 @@ contains
                                 , D_MPI_BCAST
     use modchem,           only : initchem
     use modibm,            only : initibm !cstep IBM
-    use modtrees,          only : init_trees
+    use modtrees,          only : inittrees
     use modversion,        only : git_version
 
     implicit none
