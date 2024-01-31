@@ -5,8 +5,8 @@ module modtreesdata
     save
   
     ! Global settings
-    logical :: lapply_trees = .false.       !< Switch to enable tree method
-    logical :: lreadfile_trees = .false.   !< Switch to read tree height data from a file
+    logical :: lapply_trees = .true.       !< Switch to enable tree method
+    logical :: lreadfile_trees = .true.   !< Switch to read tree height data from a file
     
   
     !< Number of grid points in a slab excluding obstacles, and the number of obstacle points
