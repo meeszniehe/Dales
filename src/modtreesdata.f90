@@ -7,11 +7,7 @@ module modtreesdata
     ! Global settings
     logical :: lapply_trees = .true.       !< Switch to enable tree method
     logical :: lreadfile_trees = .true.   !< Switch to read tree height data from a file
-    
-  
-    !< Number of grid points in a slab excluding obstacles, and the number of obstacle points
-    integer, allocatable :: Nair_trees(:) !SvdL, 20231218: veranderd in Nair_trees omdat naam Nair in conflict zou kunnen komen met Nair (modibm). Uiteindelijk moet afhankelijk van gebruik modules Nair = som(Nai_apart) genomen worden.
-    
+      
     real    :: C_stem        = 0.15            !< Drag coefficient for stem, based on modcanopy
     real    :: A_stem        = 1            !< Cross-sectional area of the stem
 
