@@ -160,7 +160,6 @@ program DALES
 
   ! Drag for single trees
   use modtrees,        only : applytrees, exittrees
-  use modtreesdata,    only : ltree_stem !, ltree_leaves
 
     !cstep  the following modules are needed if the concurrent precursor method is applied
   use modnudgeboundary, only : initnudgeboundary, nudgeboundary, exitnudgeboundary, lnudgeboundary !PVD
