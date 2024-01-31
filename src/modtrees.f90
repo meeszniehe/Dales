@@ -21,7 +21,7 @@ module modtrees
         ! ih, jh = 3, kh = 1 ghost cells for extra conditions at, for example, boundaries
         ! dx, dy = gridspacing in x and y direction
         use modglobal,  only :  zh, zf, itot, jtot, i1, j1, k1, ih, jh, imax, jmax, kmax, dx, dy, &
-                                ifinput, ifnamopt, fname_options, cexpnr, cu, cv
+                                ifinput, ifnamopt, fname_options, cexpnr, cu, cv, checknamelisterror
         use modmpi,     only :  myid, comm3d, mpierr,  myidx, myidy, d_mpi_bcast, excjs, &
                                 D_MPI_ALLREDUCE, mpi_max, MPI_SUM
 
@@ -36,14 +36,7 @@ module modtrees
         if(myid==0) then 
             open(ifnamopt,file=fname_options,status='old',iostat=ierr) ! fname_options='namoptions', iostat=0 if operation is successful, otherwise non-zero value
             read(ifnamopt,NAMTREES,iostat=ierr)
-            if (ierr > 0) then
-                print *, 'Problem in namoptions NAMTREES'
-                print *, 'iostat error: ', ierr
-                backspace(ifnamopt)
-                read(ifnamopt,fmt='(A)') readstring
-                print *, 'Invalid line: '//trim(readstring)
-                stop 'ERROR: Problem in namoptions NAMTREES'
-            endif
+            call checknamelisterror(ierr, ifnamopt, 'NAMTREES') ! print 'problem' + invalid lines in namoptions file
             write(6 ,NAMTREES)
             close(ifnamopt)
         endif
@@ -84,7 +77,7 @@ module modtrees
         if(myid==0) then
             if (lreadfile_trees) then
                 write(6,*) 'Reading inputfile in modtrees'
-                open(ifinput, file='trees.inp'//cexpnr) ! is cexpnr working?
+                open(ifinput, file='trees.inp.'//cexpnr) ! is cexpnr working?
                     do k=1,7 
                         read (ifinput,'(a100)') readstring ! read in a100 = alphanumeric, otherwise use * to let the code decide its format
                         write (6,*) readstring ! output the first 100 characters read in standard output format (6)
