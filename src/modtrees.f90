@@ -170,9 +170,7 @@ module modtrees
         return
     end subroutine exittrees
   
-
     subroutine applytrees
-        write(6,* ) 'starting with applytrees'
         ! no use of: thl=liquid potential temperature, qt=total specific humidity, e12=sqrt(tke), sv=scalar variance
         use modglobal,      only:   kmax, i1, j1, k1, ih, jh, dx, dy, dzh, dzf, rdt, timee     ! rdt=timeintegrationinterval, timee=elapsed time since start
         use modfields,      only:   um, vm, wm, &   !t-1
@@ -186,8 +184,9 @@ module modtrees
         integer :: i, j, k
         real :: drag_stem_u, drag_stem_v, drag_stem_w
 
-        !real(field_r) :: ...       
+        !real(field_r) :: ...   
 
+        write(6,* ) 'starting with applytrees after module and variable declarations'
         if (.not. lapply_trees) return
     
         !!! IMPLEMENTATION DRAG FORCE !!!
