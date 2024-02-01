@@ -28,8 +28,8 @@ module modtrees
         real(field_r), allocatable :: tree_height(:,:)              !< 2D array to store tree heights at each grid point (x,y), field_r precision?
         
         !< Number of grid points in a slab excluding obstacles, and the number of obstacle points
-        integer, allocatable    :: Nairl_trees(:)
-        integer, allocatable    :: Nair_trees(:) !SvdL, 20231218: veranderd in Nair_trees omdat naam Nair in conflict zou kunnen komen met Nair (modibm). Uiteindelijk moet afhankelijk van gebruik modules Nair = som(Nai_apart) genomen worden.
+        !integer, allocatable    :: Nairl_trees(:)
+        !integer, allocatable    :: Nair_trees(:) !SvdL, 20231218: veranderd in Nair_trees omdat naam Nair in conflict zou kunnen komen met Nair (modibm). Uiteindelijk moet afhankelijk van gebruik modules Nair = som(Nai_apart) genomen worden.
         !< for calculating free spaces of air 
 
         integer                 :: i, j, k, ierr, ii, jj, kk, n     !< initialize integer to loop over
@@ -68,11 +68,11 @@ module modtrees
         allocate(kindex_stem(2-ih:i1+ih,2-jh:j1+jh))
         !allocate(ltree_leaves(2-ih:i1+ih,2-jh:j1+jh,k1))   ! 'true' means leaves
 
-        allocate(Nair_trees(k1))                                  ! k1=kmax+1
-        allocate(Nairl_trees(k1))
+        !allocate(Nair_trees(k1))                                  ! k1=kmax+1
+        !allocate(Nairl_trees(k1))
 
         ! Set standard value to zero
-        tree_height(:,:) = 2 ! choose value higher than ground and lower than lowest tree
+        tree_height(:,:) = 0 ! choose value higher than ground and lower than lowest tree
  
         ltree_stem(:,:,:) = .false.
         kindex_stem(:,:) = 0
@@ -127,29 +127,30 @@ module modtrees
         ! from ltree_stem data exchange in x,y,z dimension, 2->i1, 2->j1, 1->k1, 
         call excjs(ltree_stem,2,i1,2,j1,1,k1,ih,jh)       
         write(6,*) 'excjs ltree_stem succesfull'
+        
         !!! COUNT NUMBER OF GRIDCELLS WITHOUT TREE PER VERTICAL LEVEL !!!
         ! Voor statistiek gebruikt, niet voor simuleren
-        Nair_trees(:) = 0 
-        Nairl_trees(:) = 0    ! local counter
-        do i=2,i1
-            do j=2,j1
-                do k=kindex_stem(i,j),k1          
-                    Nairl_trees(k) = Nairl_trees(k)+1 
-                enddo
-            enddo
-        enddo
-        write(6,*) 'Statistics done' 
-        
-        call D_MPI_ALLREDUCE(Nairl_trees,Nair_trees,k1,MPI_SUM,comm3d,mpierr)
-        write(6,*) 'MPI_ALLREDUCE succesfull'
+        !Nair_trees(:) = 0 
+        !Nairl_trees(:) = 0    ! local counter
+        !do i=2,i1
+        !    do j=2,j1
+        !        do k=kindex_stem(i,j),k1          
+        !            Nairl_trees(k) = Nairl_trees(k)+1 
+        !        enddo
+        !    enddo
+        !enddo
+        !write(6,*) 'Statistics done' 
+         
+        !call D_MPI_ALLREDUCE(Nairl_trees,Nair_trees,k1,MPI_SUM,comm3d,mpierr)
+        !write(6,*) 'MPI_ALLREDUCE succesfull'
 
         write(6,* ) 'start deallocate'
         deallocate(tree_height)
         write(6,* ) 'deallocated tree_height'
-        deallocate(Nairl_trees)
-        write(6,* ) 'deallocated Nairl_trees'
-        deallocate(Nair_trees)
-        write(6,* ) 'deallocated Nair_trees'
+        !deallocate(Nairl_trees)
+        !write(6,* ) 'deallocated Nairl_trees'
+        !deallocate(Nair_trees)
+        !write(6,* ) 'deallocated Nair_trees'
         deallocate(kindex_stem)
         write(6,* ) 'deallocated kindex_stem'
         write(6,*) 'exit initrees'
