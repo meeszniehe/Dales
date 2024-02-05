@@ -62,7 +62,7 @@ module modtrees
         endif
 
         !!! ALLOCATE VARIABLES !!!  
-        write(6,*) 'allocating fields in modtrees'
+        !write(6,*) 'allocating fields in modtrees'
         allocate(tree_height(itot+1,jtot+1))                ! +1=extra room to store bc or staggered variables, velocity on face/pressure in center?
         allocate(ltree_stem(2-ih:i1+ih,2-jh:j1+jh,k1))      ! 'true' means there is a stem
         allocate(kindex_stem(2-ih:i1+ih,2-jh:j1+jh))
@@ -108,7 +108,7 @@ module modtrees
         endif !myid==0
         
         call D_MPI_BCAST(tree_height,(itot+1)*(jtot+1),0,comm3d,mpierr)
-        write(6,*) 'broadcasted tree_height'
+        !write(6,*) 'broadcasted tree_height'
 
         !!! INDICATE STEM & LEAF CELLS !!!
         do i=2,i1
@@ -118,7 +118,7 @@ module modtrees
                         ltree_stem(i,j,k) = .true.         ! true/false array to indicate stem cells
                         kindex_stem(i,j)   = k + 1     	! werkt niet voor overhangende bladeren/takken
                         write(6,*) 'ltree_stem',i+myidx*imax,j+myidy*jmax,i,j,k,ltree_stem(i,j,k),tree_height(i+myidx*imax,j+myidy*jmax),zh(kindex_stem(i,j))
-                        write(6,*) 'indicated stem and leaf cells'
+                        !write(6,*) 'indicated stem and leaf cells'
                     endif
                 end do  !k
             end do      !j
@@ -126,7 +126,7 @@ module modtrees
 
         ! from ltree_stem data exchange in x,y,z dimension, 2->i1, 2->j1, 1->k1, 
         call excjs(ltree_stem,2,i1,2,j1,1,k1,ih,jh)       
-        write(6,*) 'excjs ltree_stem succesfull'
+        !write(6,*) 'excjs ltree_stem succesfull'
         
         !!! COUNT NUMBER OF GRIDCELLS WITHOUT TREE PER VERTICAL LEVEL !!!
         ! Voor statistiek gebruikt, niet voor simuleren
@@ -144,16 +144,16 @@ module modtrees
         !call D_MPI_ALLREDUCE(Nairl_trees,Nair_trees,k1,MPI_SUM,comm3d,mpierr)
         !write(6,*) 'MPI_ALLREDUCE succesfull'
 
-        write(6,* ) 'start deallocate'
+        !write(6,* ) 'start deallocate'
         deallocate(tree_height)
-        write(6,* ) 'deallocated tree_height'
+        !write(6,* ) 'deallocated tree_height'
         !deallocate(Nairl_trees)
         !write(6,* ) 'deallocated Nairl_trees'
         !deallocate(Nair_trees)
         !write(6,* ) 'deallocated Nair_trees'
         deallocate(kindex_stem)
-        write(6,* ) 'deallocated kindex_stem'
-        write(6,*) 'exit initrees'
+        !write(6,* ) 'deallocated kindex_stem'
+        !write(6,*) 'exit initrees'
 
         return ! why? !SvdL, 20231218: ik weet het niet zeker, de fortran beschrijving op internet is er ook niet heel duidelijk over. In feite sluit je hiermee de subroutine af en geef je controle terug aan de routine erboven, maar het statement END SUBROUTINE zou in principe hetzelfde al moeten doen. Dus het lijkt me dubbelop. 
     end subroutine inittrees
@@ -164,7 +164,7 @@ module modtrees
     
         if (.not. (lapply_trees)) return
         deallocate(ltree_stem)
-        write(6,* ) 'deallocated ltree_stem'
+        !write(6,* ) 'deallocated ltree_stem'
         !deallocate(kindex_stem) ! deze is niet gealloceerd in hoofd routine, dus kan niet hier gedeallocate worden, maar onderaan inittrees?
         !deallocate(ltree_leaves)
 
@@ -187,7 +187,7 @@ module modtrees
 
         !real(field_r) :: ...   
 
-        write(6,* ) 'starting with applytrees after module and variable declarations'
+        !write(6,* ) 'starting with applytrees after module and variable declarations'
         if (.not. lapply_trees) return
     
         !!! IMPLEMENTATION DRAG FORCE !!!
@@ -217,12 +217,12 @@ module modtrees
                 end do
             end do
         end do
-        write(6,* ) 'dragforce applied, move to excjs variables'
+        !write(6,* ) 'dragforce applied, move to excjs variables'
         ! E.g., synchronizing data across processors, call excjs, also for e12,thl,qt,svp possiblyy?
         call excjs(up,2,i1,2,j1,1,k1,ih,jh)
         call excjs(vp,2,i1,2,j1,1,k1,ih,jh)
         !call excjs(wp,2,i1,2,j1,1,k1,ih,jh)
-        write(6,* ) 'applytrees succesfull'
+        !write(6,* ) 'applytrees succesfull'
         return
     end subroutine applytrees
 
@@ -253,7 +253,7 @@ module modtrees
         
         !SvdL, 20231218: deze heb ik uitgecommend: vanaf bovenaf gekeken is A_stem niet relevant, maar waarschijnlijk een veel kleiner oppervlak. Ook zal w zelf erg klein zijn.
         ! drag_stem_w = -C_stem * A_stem * w * u_mag
-        write(6,* ) 'dragforce calculated'
+        !write(6,* ) 'dragforce calculated'
      end subroutine drag_force_stem
     
     
