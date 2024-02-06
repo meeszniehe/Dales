@@ -141,6 +141,7 @@ module modtrees
         !enddo
         !write(6,*) 'Statistics done' 
          
+        ! In d_mpi_allreduce k1 is the count which differs per i,j position due to a changing kindex_stem
         !call D_MPI_ALLREDUCE(Nairl_trees,Nair_trees,k1,MPI_SUM,comm3d,mpierr)
         !write(6,*) 'MPI_ALLREDUCE succesfull'
 
@@ -195,8 +196,8 @@ module modtrees
     
         !SvdL, 20231218: ik snap je berekening/formule hier niet helemaal (gebruik rdt, etc). Morgen bespreken. Code technisch werkt het waarschijnlijk wel.
 
-        do i=1,i1
-            do j=1,j1
+        do i=2,i1
+            do j=2,j1
                 do k=1,kmax                  
                     if(ltree_stem(i,j,k)) then   ! could be faster by limiting k to highest tree value?
                         ! Calculate drag in centre of cell in u and v direction
