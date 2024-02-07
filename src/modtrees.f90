@@ -219,7 +219,7 @@ module modtrees
             end do
         end do
         !write(6,* ) 'dragforce applied, move to excjs variables'
-        ! E.g., synchronizing data across processors, call excjs, also for e12,thl,qt,svp possiblyy?
+        ! E.g., synchronizing data across processors, call excjs, also for e12,thl,qt,svp possibly?
         call excjs(up,2,i1,2,j1,1,k1,ih,jh)
         call excjs(vp,2,i1,2,j1,1,k1,ih,jh)
         !call excjs(wp,2,i1,2,j1,1,k1,ih,jh)
