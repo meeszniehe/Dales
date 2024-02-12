@@ -90,7 +90,7 @@ module modtrees
         
                     !SvdL, 20231218: er wordt hier omgekeerd geloopt, omdat de data-ordening van lezen in fortran anders is dan de standaard ordening van onze wiskundige assen. 
                     !SvdL, 20231218: moet je ook rekening mee houden met het maken van de case: waardes in xy-vlak omgekeerd wegschrijven (zie voorbeeldscript, moet ik nog sturen..)
-                    do j=jtot+1,2,-1        ! loop backwarts? keep first value open for bc 
+                    do j=2,jtot+1        ! loop backwarts? keep first value open for bc 
                         do i=2,itot+1    
                             read(ifinput,'(F6.1)') tree_height(i,j) ! F=floating point number, 6.1=6 characters wide with one digit behind decimal point
                         enddo
@@ -249,8 +249,8 @@ module modtrees
         u_mag = 0.25*sqrt((u1+u2)**2 + (v1+v2)**2 + (w1+w2)**2)
 
         ! Calculate the drag force components
-        drag_stem_u = -C_stem * A_stem * 0.5 * (u1+u2) * u_mag
-        drag_stem_v = -C_stem * A_stem * 0.5 * (v1+v2) * u_mag
+        drag_stem_u = C_stem * A_stem * 0.5 * (u1+u2) * u_mag
+        drag_stem_v = C_stem * A_stem * 0.5 * (v1+v2) * u_mag
         
         !SvdL, 20231218: deze heb ik uitgecommend: vanaf bovenaf gekeken is A_stem niet relevant, maar waarschijnlijk een veel kleiner oppervlak. Ook zal w zelf erg klein zijn.
         ! drag_stem_w = -C_stem * A_stem * w * u_mag
