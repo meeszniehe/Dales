@@ -90,8 +90,9 @@ module modtrees
         
                     !SvdL, 20231218: er wordt hier omgekeerd geloopt, omdat de data-ordening van lezen in fortran anders is dan de standaard ordening van onze wiskundige assen. 
                     !SvdL, 20231218: moet je ook rekening mee houden met het maken van de case: waardes in xy-vlak omgekeerd wegschrijven (zie voorbeeldscript, moet ik nog sturen..)
-                    do j=2,jtot+1        ! loop backwarts? keep first value open for bc 
-                        do i=2,itot+1    
+                            ! loop backwarts? keep first value open for bc 
+                    do j=2,jtot+1
+                        do i=2,itot+1
                             read(ifinput,'(F6.1)') tree_height(i,j) ! F=floating point number, 6.1=6 characters wide with one digit behind decimal point
                         enddo
                     enddo 
