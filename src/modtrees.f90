@@ -208,8 +208,9 @@ module modtrees
                         up(i,j,k) = up(i,j,k) - drag_stem_u/2  
                         vp(i,j-1,k) = vp(i,j-1,k) - drag_stem_v/2        ! averaged for gridspacing dy
                         vp(i,j,k) = vp(i,j,k) - drag_stem_v/2
-                        ! wp(i,j,k) = wp(i,j,k) - (drag_stem_w*rdt)/(dzf*rho_air)
-                        write(6,*) 'tendencies',up(i-1,j,k), up(i,j,k), vp(i,j-1,k), vp(i,j,k)
+                        wp(i,j,k-1) = 0
+                        wp(i,j,k) = 0
+                        write(6,*) 'tendencies',up(i-1,j,k), up(i,j,k), vp(i,j-1,k), vp(i,j,k), wp(i,j,k-1), wp(i,j,k)
                     !elseif (ltree_leaves(i,j,k)) then   ! Drag force due to leaves
                         !call drag_force_leaves(C_leaves, A_leaves, um(i,j,k), vm(i,j,k), wm(i,j,k), drag_leaves_u, drag_leaves_v, drag_leaves_w)
                         !up(i,j,k) = up(i,j,k) - (drag_leaves_u*rdt)/(dx*rho_air)         ! averaged for gridspacing dx
