@@ -224,8 +224,8 @@ module modtrees
         ! E.g., synchronizing data across processors, call excjs, also for e12,thl,qt,svp possibly?
         call excjs(up,2,i1,2,j1,1,k1,ih,jh)
         call excjs(vp,2,i1,2,j1,1,k1,ih,jh)
-        !call excjs(wp,2,i1,2,j1,1,k1,ih,jh)
-        !write(6,* ) 'applytrees succesfull'
+        call excjs(wp,2,i1,2,j1,1,k1,ih,jh)
+        write(6,* ) 'applytrees succesfull'
         return
     end subroutine applytrees
 
