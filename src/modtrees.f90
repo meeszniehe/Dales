@@ -197,12 +197,12 @@ module modtrees
     
         !SvdL, 20231218: ik snap je berekening/formule hier niet helemaal (gebruik rdt, etc). Morgen bespreken. Code technisch werkt het waarschijnlijk wel.
 
-        do i=3,i1-1
-            do j=3,j1-1
-                do k=1,kmax                  
+        do i=2,i1
+            do j=2,j1
+                do k=2,kmax                  
                     if(ltree_stem(i,j,k)) then   ! could be faster by limiting k to highest tree value?
                         ! Calculate drag in centre of cell in u and v direction
-                        call drag_force_stem(C_stem, A_stem, um(i-1,j,k), vm(i,j-1,k), wm(i,j,k-1), um(i,j,k), vm(i,j,k), wm(i,j,k), drag_stem_u, drag_stem_v, drag_stem_w)
+                        call drag_force_stem(C_stem, A_stem, um(i-1,j,k), vm(i,j-1,k), wm(i,j,k-1), um(i,j,k), vm(i,j,k), wm(i,j,k), drag_stem_u, drag_stem_v)
                         ! Reassign the velocity value at the faces adjusted for drag in u and v direction
                         up(i-1,j,k) = up(i-1,j,k) - drag_stem_u/2        ! averaged for gridspacing dx, up = in kracht uitgedrukt, dx weg?
                         up(i,j,k) = up(i,j,k) - drag_stem_u/2  
@@ -232,7 +232,7 @@ module modtrees
     ! en (2) nu bereken je per i,j,k iteratie de kracht, maar dat houdt ook N^3 functiecalls in. Dat gebeurt in modibm ook, al vraag ik me af of dat inderdaad de beste optie is.. voor nu gewoon later zou ik zeggen.
     ! en (3) de snelheden zijn gegeven op de wanden van de cellen, dus de snelheid in het midden van de zelf is een middeling van deze snelheden. Dat zou eventueel nog geimplemteerd moeten worden (zie onder) 
     !SvdL, 20231218: heb de indentatie deels aangepast.
-    subroutine drag_force_stem(C_stem, A_stem, u1, v1, w1, u2, v2, w2, drag_stem_u, drag_stem_v, drag_stem_w)
+    subroutine drag_force_stem(C_stem, A_stem, u1, v1, w1, u2, v2, w2, drag_stem_u, drag_stem_v)
         implicit none
         
         ! Input variables
@@ -241,18 +241,19 @@ module modtrees
         real, intent(in) :: u1, v1, w1, u2, v2, w2  ! Velocity components
 
         ! Output variables
-        real, intent(out) :: drag_stem_u, drag_stem_v, drag_stem_w 
+        real, intent(out) :: drag_stem_u, drag_stem_v 
 
         ! Local variables
         real :: u_mag   ! Magnitude of the velocity vector
 
         ! Magnitude of the velocity vector at centre of gridcell
         u_mag = 0.25*sqrt((u1+u2)**2 + (v1+v2)**2 + (w1+w2)**2)
-
+        write(6,*) 'velocity magnitude calculated', u_mag
         ! Calculate the drag force components
         drag_stem_u = C_stem * A_stem * 0.5 * (u1+u2) * u_mag
         drag_stem_v = C_stem * A_stem * 0.5 * (v1+v2) * u_mag
         
+        write(6,*) 'drag stem u and v', drag_stem_u, drag_stem_v
         !SvdL, 20231218: deze heb ik uitgecommend: vanaf bovenaf gekeken is A_stem niet relevant, maar waarschijnlijk een veel kleiner oppervlak. Ook zal w zelf erg klein zijn.
         ! drag_stem_w = -C_stem * A_stem * w * u_mag
         !write(6,* ) 'dragforce calculated'
