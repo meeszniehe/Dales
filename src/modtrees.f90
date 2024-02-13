@@ -90,9 +90,8 @@ module modtrees
         
                     !SvdL, 20231218: er wordt hier omgekeerd geloopt, omdat de data-ordening van lezen in fortran anders is dan de standaard ordening van onze wiskundige assen. 
                     !SvdL, 20231218: moet je ook rekening mee houden met het maken van de case: waardes in xy-vlak omgekeerd wegschrijven (zie voorbeeldscript, moet ik nog sturen..)
-                            ! loop backwarts? keep first value open for bc 
-                    do j=2,jtot+1
-                        do i=2,itot+1
+                    do j=jtot+1,2,-1        ! loop backwarts? keep first value open for bc 
+                        do i=2,itot+1    
                             read(ifinput,'(F6.1)') tree_height(i,j) ! F=floating point number, 6.1=6 characters wide with one digit behind decimal point
                         enddo
                     enddo 
@@ -118,6 +117,7 @@ module modtrees
                     if(zf(k).LE.tree_height(i+myidx*imax,j+myidy*jmax)) then  ! obstacle height is above mid point of vertical grid
                         ltree_stem(i,j,k) = .true.         ! true/false array to indicate stem cells
                         kindex_stem(i,j)   = k + 1     	! werkt niet voor overhangende bladeren/takken
+                        ! 
                         write(6,*) 'ltree_stem',i+myidx*imax,j+myidy*jmax,i,j,k,ltree_stem(i,j,k),tree_height(i+myidx*imax,j+myidy*jmax),zh(kindex_stem(i,j))
                         !write(6,*) 'indicated stem and leaf cells'
                     endif
@@ -197,8 +197,8 @@ module modtrees
     
         !SvdL, 20231218: ik snap je berekening/formule hier niet helemaal (gebruik rdt, etc). Morgen bespreken. Code technisch werkt het waarschijnlijk wel.
 
-        do i=2,i1
-            do j=2,j1
+        do i=3,i1-1
+            do j=3,j1-1
                 do k=1,kmax                  
                     if(ltree_stem(i,j,k)) then   ! could be faster by limiting k to highest tree value?
                         ! Calculate drag in centre of cell in u and v direction
