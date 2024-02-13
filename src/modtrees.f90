@@ -201,6 +201,7 @@ module modtrees
             do j=2,j1
                 do k=2,kmax                  
                     if(ltree_stem(i,j,k)) then   ! could be faster by limiting k to highest tree value?
+                        write(6,*) 'ltree is true for', i, j, k
                         ! Calculate drag in centre of cell in u and v direction
                         call drag_force_stem(C_stem, A_stem, um(i-1,j,k), vm(i,j-1,k), wm(i,j,k-1), um(i,j,k), vm(i,j,k), wm(i,j,k), drag_stem_u, drag_stem_v)
                         ! Reassign the velocity value at the faces adjusted for drag in u and v direction
@@ -208,9 +209,9 @@ module modtrees
                         up(i,j,k) = up(i,j,k) - drag_stem_u/2  
                         vp(i,j-1,k) = vp(i,j-1,k) - drag_stem_v/2        ! averaged for gridspacing dy
                         vp(i,j,k) = vp(i,j,k) - drag_stem_v/2
-                        wp(i,j,k-1) = 0
-                        wp(i,j,k) = 0
-                        write(6,*) 'tendencies',up(i-1,j,k), up(i,j,k), vp(i,j-1,k), vp(i,j,k), wp(i,j,k-1), wp(i,j,k)
+                        !wp(i,j,k-1) = 0
+                        !wp(i,j,k) = 0
+                        write(6,*) 'tendencies', up(i-1,j,k), up(i,j,k), vp(i,j-1,k), vp(i,j,k), wp(i,j,k-1), wp(i,j,k)
                     !elseif (ltree_leaves(i,j,k)) then   ! Drag force due to leaves
                         !call drag_force_leaves(C_leaves, A_leaves, um(i,j,k), vm(i,j,k), wm(i,j,k), drag_leaves_u, drag_leaves_v, drag_leaves_w)
                         !up(i,j,k) = up(i,j,k) - (drag_leaves_u*rdt)/(dx*rho_air)         ! averaged for gridspacing dx
@@ -224,7 +225,7 @@ module modtrees
         ! E.g., synchronizing data across processors, call excjs, also for e12,thl,qt,svp possibly?
         call excjs(up,2,i1,2,j1,1,k1,ih,jh)
         call excjs(vp,2,i1,2,j1,1,k1,ih,jh)
-        call excjs(wp,2,i1,2,j1,1,k1,ih,jh)
+        #call excjs(wp,2,i1,2,j1,1,k1,ih,jh)
         write(6,* ) 'applytrees succesfull'
         return
     end subroutine applytrees
