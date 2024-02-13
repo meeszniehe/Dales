@@ -209,7 +209,7 @@ module modtrees
                         vp(i,j-1,k) = vp(i,j-1,k) - drag_stem_v/2        ! averaged for gridspacing dy
                         vp(i,j,k) = vp(i,j,k) - drag_stem_v/2
                         ! wp(i,j,k) = wp(i,j,k) - (drag_stem_w*rdt)/(dzf*rho_air)
-
+                        write(6,*) 'tendencies',up(i-1,j,k), up(i,j,k), vp(i,j-1,k), vp(i,j,k)
                     !elseif (ltree_leaves(i,j,k)) then   ! Drag force due to leaves
                         !call drag_force_leaves(C_leaves, A_leaves, um(i,j,k), vm(i,j,k), wm(i,j,k), drag_leaves_u, drag_leaves_v, drag_leaves_w)
                         !up(i,j,k) = up(i,j,k) - (drag_leaves_u*rdt)/(dx*rho_air)         ! averaged for gridspacing dx
@@ -248,12 +248,12 @@ module modtrees
 
         ! Magnitude of the velocity vector at centre of gridcell
         u_mag = 0.25*sqrt((u1+u2)**2 + (v1+v2)**2 + (w1+w2)**2)
-        write(6,*) 'velocity magnitude calculated', u_mag
+
         ! Calculate the drag force components
         drag_stem_u = C_stem * A_stem * 0.5 * (u1+u2) * u_mag
         drag_stem_v = C_stem * A_stem * 0.5 * (v1+v2) * u_mag
 
-        write(6,*) 'drag stem u and v', drag_stem_u, drag_stem_v
+        write(6,*) 'drag_force', u_mag, drag_stem_u, drag_stem_v, u1, u2, v1, v2, w1, w2
         !SvdL, 20231218: deze heb ik uitgecommend: vanaf bovenaf gekeken is A_stem niet relevant, maar waarschijnlijk een veel kleiner oppervlak. Ook zal w zelf erg klein zijn.
         ! drag_stem_w = -C_stem * A_stem * w * u_mag
         !write(6,* ) 'dragforce calculated'
