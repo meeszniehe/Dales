@@ -185,7 +185,7 @@ module modtrees
     
         ! Declare local variables
         integer :: i, j, k
-        real :: drag_stem_u, drag_stem_v, drag_stem_w
+        real :: drag_stem_u, drag_stem_v
 
         !real(field_r) :: ...   
 
@@ -252,7 +252,7 @@ module modtrees
         ! Calculate the drag force components
         drag_stem_u = C_stem * A_stem * 0.5 * (u1+u2) * u_mag
         drag_stem_v = C_stem * A_stem * 0.5 * (v1+v2) * u_mag
-        
+
         write(6,*) 'drag stem u and v', drag_stem_u, drag_stem_v
         !SvdL, 20231218: deze heb ik uitgecommend: vanaf bovenaf gekeken is A_stem niet relevant, maar waarschijnlijk een veel kleiner oppervlak. Ook zal w zelf erg klein zijn.
         ! drag_stem_w = -C_stem * A_stem * w * u_mag
