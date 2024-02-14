@@ -199,11 +199,11 @@ module modtrees
 
         do i=2,i1
             do j=2,j1
-                do k=1,kmax                 
+                do k=2,k1                 
                     if(ltree_stem(i,j,k)) then   ! could be faster by limiting k to highest tree value?
-                        write(6,*) 'ltree is true for', i, j, k
+                        write(6,*) 'ltree is true for index', i, j, k
                         ! Calculate drag in centre of cell in u and v direction
-                        call drag_force_stem(C_stem, A_stem, um(i-1,j,k), vm(i,j-1,k), um(i,j,k), vm(i,j,k), drag_stem_u, drag_stem_v)
+                        call drag_force_stem(C_stem, A_stem, um(i-1,j,k), vm(i,j-1,k), wm(i,j,k-1), um(i,j,k), vm(i,j,k), w(i,j,k), drag_stem_u, drag_stem_v)
                         ! Reassign the velocity value at the faces adjusted for drag in u and v direction
                         up(i-1,j,k) = up(i-1,j,k) - drag_stem_u/2        ! averaged for gridspacing dx, up = in kracht uitgedrukt, dx weg?
                         up(i,j,k) = up(i,j,k) - drag_stem_u/2  
@@ -211,7 +211,8 @@ module modtrees
                         vp(i,j,k) = vp(i,j,k) - drag_stem_v/2
                         !wp(i,j,k-1) = 0
                         !wp(i,j,k) = 0
-                        write(6,*) 'tendencies', up(i-1,j,k), up(i,j,k), vp(i,j-1,k), vp(i,j,k)
+                        write(6,*) 'up', up(i-1,j,k), up(i,j,k)
+                        write(6,*) 'vp', vp(i,j-1,k), vp(i,j,k)
                     !elseif (ltree_leaves(i,j,k)) then   ! Drag force due to leaves
                         !call drag_force_leaves(C_leaves, A_leaves, um(i,j,k), vm(i,j,k), wm(i,j,k), drag_leaves_u, drag_leaves_v, drag_leaves_w)
                         !up(i,j,k) = up(i,j,k) - (drag_leaves_u*rdt)/(dx*rho_air)         ! averaged for gridspacing dx
@@ -234,13 +235,13 @@ module modtrees
     ! en (2) nu bereken je per i,j,k iteratie de kracht, maar dat houdt ook N^3 functiecalls in. Dat gebeurt in modibm ook, al vraag ik me af of dat inderdaad de beste optie is.. voor nu gewoon later zou ik zeggen.
     ! en (3) de snelheden zijn gegeven op de wanden van de cellen, dus de snelheid in het midden van de zelf is een middeling van deze snelheden. Dat zou eventueel nog geimplemteerd moeten worden (zie onder) 
     !SvdL, 20231218: heb de indentatie deels aangepast.
-    subroutine drag_force_stem(C_stem, A_stem, u1, v1, u2, v2, drag_stem_u, drag_stem_v)
+    subroutine drag_force_stem(C_stem, A_stem, u1, v1, w1, u2, v2, w2, drag_stem_u, drag_stem_v)
         implicit none
         
         ! Input variables
         real, intent(in) :: C_stem   ! Drag coefficient for stem
         real, intent(in) :: A_stem   ! Cross-sectional area of the stem
-        real, intent(in) :: u1, v1, u2, v2  ! Velocity components
+        real, intent(in) :: u1, v1, u2, v2, w1, w2  ! Velocity components
 
         ! Output variables
         real, intent(out) :: drag_stem_u, drag_stem_v 
@@ -254,8 +255,13 @@ module modtrees
         ! Calculate the drag force components
         drag_stem_u = C_stem * A_stem * 0.5 * (u1+u2) * u_mag
         drag_stem_v = C_stem * A_stem * 0.5 * (v1+v2) * u_mag
-        
-        write(6,*) 'drag_force', u_mag, drag_stem_u, drag_stem_v, u1, u2, v1, v2 !w1, w2
+
+        write(6,*) 'u_mag', u_mag
+        write(6,*) 'drag_u', drag_stem_u
+        write(6,*) 'drag_v', drag_stem_v
+        write(6,*) 'u1, u2', u1, u2
+        write(6,*) 'v1, v2', v1, v2
+        write(6,*) 'w1, w2', w1, w2
         !SvdL, 20231218: deze heb ik uitgecommend: vanaf bovenaf gekeken is A_stem niet relevant, maar waarschijnlijk een veel kleiner oppervlak. Ook zal w zelf erg klein zijn.
         ! drag_stem_w = -C_stem * A_stem * w * u_mag
         !write(6,* ) 'dragforce calculated'
