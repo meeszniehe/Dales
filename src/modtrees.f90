@@ -197,17 +197,19 @@ module modtrees
     
         !SvdL, 20231218: ik snap je berekening/formule hier niet helemaal (gebruik rdt, etc). Morgen bespreken. Code technisch werkt het waarschijnlijk wel.
 
-        do i=2,imax
-            do j=2,jmax
+        do i=2,i1
+            do j=2,j1
                 do k=1,kmax                 
                     if(ltree_stem(i,j,k)) then   ! could be faster by limiting k to highest tree value?
                         write(6,*) 'ltree is true for index', i, j, k
                         ! Calculate drag in centre of cell in u and v direction
+                        drag_stem_u = 0 
+                        drag_stem_v = 0
                         call drag_force_stem(C_stem, A_stem, u0(i-1,j,k), v0(i,j-1,k), u0(i,j,k), v0(i,j,k), drag_stem_u, drag_stem_v)
                         ! Reassign the velocity value at the faces adjusted for drag in u and v direction
-                        !up(i-1,j,k) = up(i-1,j,k) - drag_stem_u/2        ! averaged for gridspacing dx, up = in kracht uitgedrukt, dx weg?
+                        up(i-1,j,k) = up(i-1,j,k) - drag_stem_u/2        ! averaged for gridspacing dx, up = in kracht uitgedrukt, dx weg?
                         up(i,j,k) = up(i,j,k) - drag_stem_u/2  
-                        !vp(i,j-1,k) = vp(i,j-1,k) - drag_stem_v/2        ! averaged for gridspacing dy
+                        vp(i,j-1,k) = vp(i,j-1,k) - drag_stem_v/2        ! averaged for gridspacing dy
                         vp(i,j,k) = vp(i,j,k) - drag_stem_v/2
                         !wp(i,j,k-1) = 0
                         !wp(i,j,k) = 0
