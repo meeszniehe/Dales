@@ -197,8 +197,8 @@ module modtrees
     
         !SvdL, 20231218: ik snap je berekening/formule hier niet helemaal (gebruik rdt, etc). Morgen bespreken. Code technisch werkt het waarschijnlijk wel.
 
-        do i=2,i1
-            do j=2,j1
+        do i=2,imax
+            do j=2,jmax
                 do k=1,kmax                 
                     if(ltree_stem(i,j,k)) then   ! could be faster by limiting k to highest tree value?
                         write(6,*) 'ltree is true for index', i, j, k
