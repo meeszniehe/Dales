@@ -241,7 +241,7 @@ module modtrees
         ! Input variables
         real, intent(in) :: C_stem   ! Drag coefficient for stem
         real, intent(in) :: A_stem   ! Cross-sectional area of the stem
-        real, intent(in) :: u1, v1, u2, v2, w1, w2  ! Velocity components
+        real, intent(in) :: u1, v1, u2, v2  ! Velocity components
 
         ! Output variables
         real, intent(out) :: drag_stem_u, drag_stem_v 
