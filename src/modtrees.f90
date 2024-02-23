@@ -213,8 +213,8 @@ module modtrees
                         vp(i,j,k) = vp(i,j,k) - drag_stem_v/2
                         !wp(i,j,k-1) = 0
                         !wp(i,j,k) = 0
-                        write(6,*) 'up', up(i-1,j,k), up(i,j,k)
-                        write(6,*) 'vp', vp(i,j-1,k), vp(i,j,k)
+                        ! write(6,*) 'up', up(i-1,j,k), up(i,j,k)
+                        ! write(6,*) 'vp', vp(i,j-1,k), vp(i,j,k)
                     !elseif (ltree_leaves(i,j,k)) then   ! Drag force due to leaves
                         !call drag_force_leaves(C_leaves, A_leaves, um(i,j,k), vm(i,j,k), wm(i,j,k), drag_leaves_u, drag_leaves_v, drag_leaves_w)
                         !up(i,j,k) = up(i,j,k) - (drag_leaves_u*rdt)/(dx*rho_air)         ! averaged for gridspacing dx
@@ -258,10 +258,10 @@ module modtrees
         drag_stem_u = C_stem * A_stem * 0.5 * (u1+u2) * u_mag
         drag_stem_v = C_stem * A_stem * 0.5 * (v1+v2) * u_mag
 
-        write(6,*) 'u_mag', u_mag
-        write(6,*) 'drag_u', drag_stem_u, 'drag_v', drag_stem_v
-        write(6,*) 'u1, u2', u1, u2
-        write(6,*) 'v1, v2', v1, v2
+        ! write(6,*) 'u_mag', u_mag
+        ! write(6,*) 'drag_u', drag_stem_u, 'drag_v', drag_stem_v
+        ! write(6,*) 'u1, u2', u1, u2
+        ! write(6,*) 'v1, v2', v1, v2
         !write(6,*) 'w1, w2', w1, w2
         !SvdL, 20231218: deze heb ik uitgecommend: vanaf bovenaf gekeken is A_stem niet relevant, maar waarschijnlijk een veel kleiner oppervlak. Ook zal w zelf erg klein zijn.
         ! drag_stem_w = -C_stem * A_stem * w * u_mag
