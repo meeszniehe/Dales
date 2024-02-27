@@ -358,8 +358,8 @@ contains
     colat  = cos(phi)
     silat  = sin(phi)
     if (lcoriol) then
-      omega = 7.292e-5
-      omega_gs = 7.292e-5
+      omega = 0 !7.292e-5
+      omega_gs = 0 !7.292e-5
     else
       omega = 0.
       omega_gs = 0.
