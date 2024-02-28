@@ -5,8 +5,8 @@ module modtreesdata
     save
   
     ! Global settings
-    logical :: lapply_trees = .true.       !< Switch to enable tree method
-    logical :: lreadfile_trees = .true.   !< Switch to read tree height data from a file
+    logical :: lapply_trees = .false.       !< Switch to enable tree method
+    logical :: lreadfile_trees = .false.   !< Switch to read tree height data from a file
       
     real    :: C_stem        = 0.15            !< Drag coefficient for stem, based on modcanopy
     real    :: A_stem        = 1            !< Cross-sectional area of the stem
