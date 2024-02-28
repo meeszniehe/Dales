@@ -159,7 +159,7 @@ program DALES
   use modibmdata,      only : libm,lpoislast !cstep cibm 
 
   ! Drag for single trees
-  use modtrees,        only : applytrees, exittrees
+  use modtrees,        only : inittrees, applytrees, exittrees
 
     !cstep  the following modules are needed if the concurrent precursor method is applied
   use modnudgeboundary, only : initnudgeboundary, nudgeboundary, exitnudgeboundary, lnudgeboundary !PVD
@@ -205,7 +205,7 @@ program DALES
 ! call initchem
   call initheterostats
   call initcanopy
-
+  call inittrees
   !call initspectra2
   call initcape
   call initnudgeboundary !cstep  IBM with concurrent precursor
@@ -240,6 +240,7 @@ program DALES
     call samptend(tend_adv)
     call subgrid
     call canopy
+    call applytrees
     call samptend(tend_subg)
 
 !-----------------------------------------------------
@@ -282,8 +283,6 @@ program DALES
   enddo
   enddo
   enddo
-
-    call applytrees !Trees present, represent them by drag value
 
     !< MK: Ordering of the Poisson Solver and the IBM, (lpoislast==.true.): 
            !IBM -> Pois, (lpoislast==.false.): zerowallvelocity -> Pois -> IBM

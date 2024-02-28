@@ -92,7 +92,7 @@ contains
                                 , D_MPI_BCAST
     use modchem,           only : initchem
     use modibm,            only : initibm !cstep IBM
-    use modtrees,          only : inittrees
+    !use modtrees,          only : inittrees
     use modversion,        only : git_version
 
     implicit none
@@ -282,7 +282,7 @@ contains
 
     call initibm        !MK Initialize for IBM !cstep should be called before initsurface
                         !cstep IBM here ibas_prf will be changed to 2 if ibm is applied
-    call inittrees
+    !call inittrees
     call initboundary
     call initthermodynamics
     call initradiation
