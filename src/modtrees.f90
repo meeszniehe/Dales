@@ -51,6 +51,8 @@ module modtrees
         call D_MPI_BCAST(lapply_trees,1,0,comm3d,mpierr) ! 1=onevalue, mpierr=checkforerrors
         if (.not. (lapply_trees)) return
         call D_MPI_BCAST(lreadfile_trees,1,0,comm3d,mpierr)
+        call D_MPI_BCAST(C_stem, 1, 0, comm3d, mpierr)
+        call D_MPI_BCAST(A_stem, 1, 0, comm3d, mpierr)
         
         !!! MOVING TREES !!!
         if (abs(cu)>1e-15 .or. abs(cv)>1e-15) then
