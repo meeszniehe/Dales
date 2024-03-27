@@ -154,8 +154,8 @@ module modtrees
     subroutine applytrees
         ! no use of: thl=liquid potential temperature, qt=total specific humidity, e12=sqrt(tke), sv=scalar variance
         use modglobal,      only:   kmax, i1, j1, k1, ih, jh, dx, dy, dzh, dzf, rdt, timee     ! rdt=timeintegrationinterval, timee=elapsed time since start
-        use modfields,      only:   um, vm, wm, e12m &   !t-1
-                                    u0, v0, w0, e120 &   !t
+        use modfields,      only:   um, vm, wm, e12m, &   !t-1
+                                    u0, v0, w0, e120, &   !t
                                     up, vp, wp, e12p    !tendency of ..m
         use modtreesdata,   only:   lapply_trees, C_stem, A_stem
         use modmpi,         only:   excjs    
@@ -186,6 +186,7 @@ module modtrees
                         ! Drag on SFS-TKE
                         drag_SFS = 0
                         call drag_force_SFS_TKE(C_stem, A_stem, u0(i-1,j,k), v0(i,j-1,k), u0(i,j,k), v0(i,j,k), e120(i,j,k), drag_SFS) ! e120?? 
+                        ! use square of e12 or not?
                         write(6,*) 'e12p beforehand: ', e12p(i,j,k)
                         e12p(i,j,k) = e12p(i,j,k) - drag_SFS
                         write(6,*) 'SFS drag force applied, drag: ', drag_SFS, 'and e12p afterwards: ', e12p(i,j,k)
