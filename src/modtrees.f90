@@ -218,6 +218,7 @@ module modtrees
         real, intent(in) :: C_stem   ! Drag coefficient for stem
         real, intent(in) :: A_stem   ! Area of stem
         real, intent(in) :: u1,v1,u2,v2 ! velocity component
+        real, intent(in) :: e120 ! SFS-TKE (scalar at cell-center)
         
         ! output variables
         real, intent(out) :: drag_SFS ! set to zero before call in applytrees
