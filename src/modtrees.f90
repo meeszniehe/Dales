@@ -182,12 +182,13 @@ module modtrees
                         up(i,j,k) = up(i,j,k) - drag_stem_u/2  
                         vp(i,j-1,k) = vp(i,j-1,k) - drag_stem_v/2      
                         vp(i,j,k) = vp(i,j,k) - drag_stem_v/2
-                        
+                        write(6,*) 'resolved drag force applied'
                         ! Drag on SFS-TKE
                         drag_SFS = 0
                         call drag_force_SFS_TKE(C_stem, A_stem, u0(i-1,j,k), v0(i,j-1,k), u0(i,j,k), v0(i,j,k), e120, drag_SFS) ! e120?? 
-                        e12p(i,j,k) = e12p(i,j,k) - drag_SFS/2
-                
+                        write(6,*) 'e12p beforehand: ', e12p(i,j,k)
+                        e12p(i,j,k) = e12p(i,j,k) - drag_SFS
+                        write(6,*) 'SFS drag force applied, drag: ', drag_SFS, 'and e12p afterwards: ', e12p(i,j,k)
                         !wp(i,j,k-1) = 0
                         !wp(i,j,k) = 0
                     !elseif (ltree_leaves(i,j,k)) then   ! Drag force due to leaves
