@@ -163,7 +163,7 @@ module modtrees
     
         ! Declare local variables
         integer :: i, j, k
-        real :: drag_stem_u, drag_stem_v 
+        real :: drag_stem_u, drag_stem_v, drag_SFS
 
         if (.not. lapply_trees) return
     
@@ -219,7 +219,7 @@ module modtrees
         real, intent(in) :: A_stem   ! Area of stem
         real, intent(in) :: u1,v1,u2,v2 ! velocity component
         real, intent(in) :: e120 ! SFS-TKE (scalar at cell-center)
-        
+
         ! output variables
         real, intent(out) :: drag_SFS ! set to zero before call in applytrees
 
