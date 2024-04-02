@@ -23,6 +23,7 @@ module modtrees
 
         real(field_r), allocatable :: tree_height(:,:)              !< 2D array to store tree heights at each grid point (x,y), field_r precision?
         integer                 :: i, j, k, ierr, ii, jj, kk, n     !< initialize integer to loop over
+        integer                 :: startIdx, endIdx, di, dj         !< initialize integer to loop over for tree_crown creation
         integer, allocatable    :: kindex_stem(:,:)                      !< index of stem height
         character(100)          :: readstring                       !< read files as text
             
