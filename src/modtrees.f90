@@ -189,7 +189,7 @@ module modtrees
                         ! use square of e12 or not?
                         write(6,*) 'e12p beforehand: ', e12p(i,j,k)
                         e12p(i,j,k) = e12p(i,j,k) - drag_SFS
-                        write(6,*) 'SFS drag force applied, drag: ', drag_SFS, 'and e12p afterwards: ', e12p(i,j,k)
+                        write(6,*) 'SFS drag force applied, drag: ', drag_SFS, 'and e12p afterwards: ', e12p(i,j,k), 'and e120: ', e120(i,j,k)
                         !wp(i,j,k-1) = 0
                         !wp(i,j,k) = 0
                     !elseif (ltree_leaves(i,j,k)) then   ! Drag force due to leaves
