@@ -108,7 +108,7 @@ module modtrees
                         ! write(6,*) 'ltree_stem',i+myidx*imax,j+myidy*jmax,i,j,k,ltree_stem(i,j,k),tree_height(i+myidx*imax,j+myidy*jmax),zh(kindex_stem(i,j))
                         
                         !!!! Divide tree in smaller stem and thicker crown, same C_d value still !!!!
-                        if (k <= 2) then ! For the lowest two levels, thickness is 1 grid cell
+                        if (k <= 5) then ! For the lowest two levels, thickness is 1 grid cell
                             startIdx = 0
                             endIdx = 0
                         else ! For higher levels, thickness is 3 grid cells
