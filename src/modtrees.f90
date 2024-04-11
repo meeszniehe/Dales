@@ -112,8 +112,8 @@ module modtrees
                             startIdx = 0
                             endIdx = 0
                         else ! For higher levels, thickness is 3 grid cells
-                            startIdx = -1
-                            endIdx = 1
+                            startIdx = -2
+                            endIdx = 2
                         endif 
 
                         do di = startIdx, endIdx ! if both are zero, no loop is executed
