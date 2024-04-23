@@ -102,38 +102,38 @@ module modtrees
             do j=2,j1
                 do k=1,kmax !
                     if(zf(k).LE.tree_height(i+myidx*imax,j+myidy*jmax)) then  ! obstacle height is above mid point of vertical grid
-                        !!!! Tree is represented by one straight line going straight up !!!!
-                        ! ltree_stem(i,j,k) = .true.     ! true/false array to indicate stem cells
-                        ! kindex_stem(i,j)   = k + 1     ! werkt niet voor overhangende bladeren/takken
-                        ! write(6,*) 'ltree_stem',i+myidx*imax,j+myidy*jmax,i,j,k,ltree_stem(i,j,k),tree_height(i+myidx*imax,j+myidy*jmax),zh(kindex_stem(i,j))
+                        !!! Tree is represented by one straight line going straight up !!!!
+                        ltree_stem(i,j,k) = .true.     ! true/false array to indicate stem cells
+                        kindex_stem(i,j)   = k + 1     ! werkt niet voor overhangende bladeren/takken
+                        write(6,*) 'ltree_stem',i+myidx*imax,j+myidy*jmax,i,j,k,ltree_stem(i,j,k),tree_height(i+myidx*imax,j+myidy*jmax),zh(kindex_stem(i,j))
                         
-                        !!!! Divide tree in smaller stem and thicker crown, same C_d value still !!!!
-                        if (k <= 3) then ! For the lowest two levels, thickness is 1 grid cell
-                            startIdx = 0
-                            endIdx = 0
-                        else ! For higher levels, thickness is 3 grid cells
-                            startIdx = -1
-                            endIdx = 1
-                        endif 
+                        ! !!!! Divide tree in smaller stem and thicker crown, same C_d value still !!!!
+                        ! if (k <= 3) then ! For the lowest two levels, thickness is 1 grid cell
+                        !     startIdx = 0
+                        !     endIdx = 0
+                        ! else ! For higher levels, thickness is 3 grid cells
+                        !     startIdx = -1
+                        !     endIdx = 1
+                        ! endif 
 
-                        do di = startIdx, endIdx ! if both are zero, no loop is executed
-                            do dj = startIdx, endIdx
-                                ! check whether crown stays within domain of (2-imax, 2-jmax) and move tree inward if not
-                                ! Is this needed, or does exjcs makes sure ltree=true value is send to adjecent processors?
-                                ! if ((i+di == 1) .OR. (j+dj == 1)) then 
-                                !     i = i + 1
-                                !     j = j + 1
-                                ! elseif ((i+di > imax) .OR. (j+dj > jmax)) then 
-                                !     i = i - 1
-                                !     j = j - 1    
-                                ! endif
-                                ltree_stem(i+di,j+dj,k) = .true.
-                                write(6,*) 'ltree_stem', ltree_stem(i+di,j+dj,k), i+myidx*imax,j+myidy*jmax,i,j,k,i+di,j+dj,tree_height(i+myidx*imax,j+myidy*jmax),zh(kindex_stem(i,j))
-                                if (di == 0 .AND. dj == 0) then ! Only update kindex_stem for the central cell
-                                    kindex_stem(i,j) = k + 1
-                                endif
-                            end do
-                        end do
+                        ! do di = startIdx, endIdx ! if both are zero, no loop is executed
+                        !     do dj = startIdx, endIdx
+                        !         ! check whether crown stays within domain of (2-imax, 2-jmax) and move tree inward if not
+                        !         ! Is this needed, or does exjcs makes sure ltree=true value is send to adjecent processors?
+                        !         ! if ((i+di == 1) .OR. (j+dj == 1)) then 
+                        !         !     i = i + 1
+                        !         !     j = j + 1
+                        !         ! elseif ((i+di > imax) .OR. (j+dj > jmax)) then 
+                        !         !     i = i - 1
+                        !         !     j = j - 1    
+                        !         ! endif
+                        !         ltree_stem(i+di,j+dj,k) = .true.
+                        !         write(6,*) 'ltree_stem', ltree_stem(i+di,j+dj,k), i+myidx*imax,j+myidy*jmax,i,j,k,i+di,j+dj,tree_height(i+myidx*imax,j+myidy*jmax),zh(kindex_stem(i,j))
+                        !         if (di == 0 .AND. dj == 0) then ! Only update kindex_stem for the central cell
+                        !             kindex_stem(i,j) = k + 1
+                        !         endif
+                        !     end do
+                        ! end do
 
                     endif
                 end do  !k
@@ -190,14 +190,14 @@ module modtrees
                         up(i,j,k) = up(i,j,k) - drag_stem_u/2  
                         vp(i,j-1,k) = vp(i,j-1,k) - drag_stem_v/2      
                         vp(i,j,k) = vp(i,j,k) - drag_stem_v/2
-                        ! write(6,*) 'resolved drag force applied'
+
                         ! Drag on SFS-TKE
                         drag_SFS = 0
                         call drag_force_SFS_TKE(C_stem, A_stem, u0(i-1,j,k), v0(i,j-1,k), u0(i,j,k), v0(i,j,k), e120(i,j,k), drag_SFS) ! e120?? 
                         ! use square of e12 or not?
-                        ! write(6,*) 'e12p beforehand: ', e12p(i,j,k)
+                        write(6,*) e12p(i,j,k)
                         e12p(i,j,k) = e12p(i,j,k) - drag_SFS
-                        ! write(6,*) 'SFS drag force applied, drag: ', drag_SFS, 'and e12p afterwards: ', e12p(i,j,k), 'and e120: ', e120(i,j,k)
+                        write(6,*) drag_SFS, e12p(i,j,k), e120(i,j,k)
                         !wp(i,j,k-1) = 0
                         !wp(i,j,k) = 0
                     !elseif (ltree_leaves(i,j,k)) then   ! Drag force due to leaves
@@ -235,7 +235,7 @@ module modtrees
         real :: u_mag ! magnitude of the velocity vector
 
         ! Magnitude of the velocity vector at centre of gridcell
-        u_mag = 0.25*sqrt((u1+u2)**2 + (v1+v2)**2) !+ (w1+w2)**2)
+        u_mag = sqrt((0.5*(u1+u2))**2 + (0.5*(v1+v2))**2)
         
         ! work performed by SFS motions against canopy drag (Patton et al. 2015)
         drag_SFS = (8/3)*C_stem * A_stem * u_mag * e120
@@ -262,7 +262,7 @@ module modtrees
         real :: u_mag   ! Magnitude of the velocity vector
 
         ! Magnitude of the velocity vector at centre of gridcell
-        u_mag = 0.25*sqrt((u1+u2)**2 + (v1+v2)**2) !+ (w1+w2)**2)
+        u_mag = sqrt((0.5*(u1+u2))**2 + (0.5*(v1+v2))**2) !+ (w1+w2)**2)
 
         ! Calculate the drag force components
         drag_stem_u = C_stem * A_stem * 0.5 * (u1+u2) * u_mag ! 0.5(u1+u2) -> avg in cell center
