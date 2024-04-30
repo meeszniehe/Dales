@@ -22,7 +22,7 @@ module modtrees
                                 D_MPI_ALLREDUCE, mpi_max, MPI_SUM
 
         real(field_r), allocatable :: tree_height(:,:)              !< 2D array to store tree heights at each grid point (x,y), field_r precision?
-        real, allocatable       :: A_pad(:)                    
+        real, allocatable         :: A_pad(:)                    
         integer                 :: i, j, k, ierr, ii, jj, kk, n     !< initialize integer to loop over
         integer                 :: startIdx, endIdx, di, dj         !< initialize integer to loop over for tree_crown creation
         integer, allocatable    :: kindex_stem(:,:)                      !< index of stem height
@@ -60,14 +60,13 @@ module modtrees
         allocate(tree_height(itot+1,jtot+1))                ! +1=extra room to store bc or staggered variables, velocity on face/pressure in center?
         allocate(ltree_stem(2-ih:i1+ih,2-jh:j1+jh,k1))      ! 'true' means there is a stem
         allocate(kindex_stem(2-ih:i1+ih,2-jh:j1+jh))
-        allocate(A_pad(10))                              ! +1=extra room to store bc or staggered variables, velocity on face/pressure in center?
+                                     ! +1=extra room to store bc or staggered variables, velocity on face/pressure in center?
         !allocate(ltree_leaves(2-ih:i1+ih,2-jh:j1+jh,k1))   ! 'true' means leaves
 
         ! Set default values to zero and false
         tree_height(:,:) = 0
         ltree_stem(:,:,:) = .false.
         kindex_stem(:,:) = 0
-        A_pad(:) = 0
         !ltree_leaves (:,:,:) = .false.
         
         !!! 1D input -> 2D tree_height map !!!
@@ -91,16 +90,6 @@ module modtrees
                 
                 tree_height(1,:)=tree_height(itot+1,:) !< boundary conditions
                 tree_height(:,1)=tree_height(:,jtot+1)
-                A_pad(:) = (/  0.000, &
-                        0.050, &
-                        0.200, &
-                        0.800, &
-                        1.600, &
-                        1.250, &
-                        0.800, &
-                        0.200, &
-                        0.000, &
-                        0.000  /)
                 write(6,*) 'Succesfully read inputfile in modtrees'      
             else 
                 write(6,*) 'No trees.inp file found. Stopping modtrees.'
@@ -109,7 +98,6 @@ module modtrees
         endif !myid==0
         
         call D_MPI_BCAST(tree_height,(itot+1)*(jtot+1),0,comm3d,mpierr)
-        call D_MPI_BCAST(A_pad,10,0,comm3d,mpierr)
         !!! INDICATE STEM & LEAF CELLS !!!
         do i=2,i1 ! i1=imax+1
             do j=2,j1
@@ -167,6 +155,18 @@ module modtrees
         deallocate(tree_height)
         deallocate(kindex_stem)
 
+        A_pad(10) = (/  0.000, &
+                        0.050, &
+                        0.200, &
+                        0.800, &
+                        1.600, &
+                        1.250, &
+                        0.800, &
+                        0.200, &
+                        0.000, &
+                        0.000  /)
+        call D_MPI_BCAST(A_pad,10,0,comm3d,mpierr)
+
         return ! why? !SvdL, 20231218: ik weet het niet zeker, de fortran beschrijving op internet is er ook niet heel duidelijk over. In feite sluit je hiermee de subroutine af en geef je controle terug aan de routine erboven, maar het statement END SUBROUTINE zou in principe hetzelfde al moeten doen. Dus het lijkt me dubbelop. 
     end subroutine inittrees
 
@@ -176,7 +176,6 @@ module modtrees
     
         if (.not. (lapply_trees)) return
         deallocate(ltree_stem)
-        deallocate(A_pad)
         !deallocate(ltree_leaves)
 
         return
@@ -207,7 +206,7 @@ module modtrees
                         ! Drag on resolved TKE
                         drag_stem_u = 0 
                         drag_stem_v = 0
-                        call drag_force_stem(C_stem, A_pad(k), u0(i-1,j,k), v0(i,j-1,k), u0(i,j,k), v0(i,j,k), drag_stem_u, drag_stem_v)
+                        call drag_force_stem(C_stem, (k), u0(i-1,j,k), v0(i,j-1,k), u0(i,j,k), v0(i,j,k), drag_stem_u, drag_stem_v)
                         ! Reassign the velocity value at the faces adjusted for drag in u and v direction
                         up(i-1,j,k) = up(i-1,j,k) - drag_stem_u/2        ! both sides get half the drag calculated from the middle. 
                         up(i,j,k) = up(i,j,k) - drag_stem_u/2  
