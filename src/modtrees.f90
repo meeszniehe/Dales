@@ -25,6 +25,7 @@ module modtrees
         integer                 :: i, j, k, ierr, ii, jj, kk, n     !< initialize integer to loop over
         integer                 :: startIdx, endIdx, di, dj         !< initialize integer to loop over for tree_crown creation
         integer, allocatable    :: kindex_stem(:,:)                      !< index of stem height
+        integer                 :: tempi, tempj                        !< temporary index for tree_crown creation
         character(100)          :: readstring                       !< read files as text
             
         namelist/NAMTREES/ lapply_trees, lreadfile_trees, C_stem, A_stem 
@@ -113,28 +114,32 @@ module modtrees
                         if (k <= 4) then ! For the lowest two levels, thickness is 1 grid cell
                             startIdx = 0
                             endIdx = 0
+                            tempi = i
+                            tempj = j
                         else ! For higher levels depending on tree height 
                             startIdx = -1
                             endIdx = 1
-                        endif 
+                            ! check whether crown stays within domain of (2-imax, 2-jmax) and move tree inward if not
+                            ! Is this needed, or does exjcs makes sure ltree=true value is send to adjecent processors?
+                            if ((i == 2) .OR. (j == 2)) then 
+                                tempi = i + 1
+                                tempj = j + 1
+                                write(6,*) 'i or j is 2, moved 1 up'
+                            elseif ((i == imax) .OR. (j == jmax)) then 
+                                tempi = i - 1
+                                tempj = j - 1 
+                                write(6,*) 'i or j is imax or jmax, moved 1 down'   
+                            else
+                                tempi = i
+                                tempj = j
+                                write(6,*) 'i and j are within bounds' 
+                            endif 
                         
-                        ! check whether crown stays within domain of (2-imax, 2-jmax) and move tree inward if not
-                        ! Is this needed, or does exjcs makes sure ltree=true value is send to adjecent processors?
-                        if ((i == 2) .OR. (j == 2)) then 
-                            i = i + 1
-                            j = j + 1
-                            write(6,*) 'i or j is 2, moved 1 up'
-                        elseif ((i == imax) .OR. (j == jmax)) then 
-                            i = i - 1
-                            j = j - 1 
-                            write(6,*) 'i or j is imax or jmax, moved 1 down'   
-                        endif
-                    
                         do di = startIdx, endIdx
                             do dj = startIdx, endIdx
-                                ltree_stem(i+di,j+dj,k) = .true.
-                                write(6,*) 'ltree_stem', ltree_stem(i+di,j+dj,k), i+di+myidx*imax,j+di+myidy*jmax, i, j, k, &
-                                            i+di, j+dj, tree_height(i+myidx*imax,j+myidy*jmax), zh(k)
+                                ltree_stem(tempi+di,tempj+dj,k) = .true.
+                                write(6,*) 'ltree_stem', ltree_stem(tempi+di,tempj+dj,k), tempi+di+myidx*imax,tempj+di+myidy*jmax, &
+                                            tempi, tempj, k, tempi+di, tempj+dj, tree_height(tempi+myidx*imax,tempj+myidy*jmax), zh(k)
                             end do
                         end do
 
