@@ -61,6 +61,18 @@ module modtrees
         allocate(ltree_stem(2-ih:i1+ih,2-jh:j1+jh,k1))      ! 'true' means there is a stem
         allocate(kindex_stem(2-ih:i1+ih,2-jh:j1+jh))
         allocate(A_pad(10))                                 ! 10=number of elements in A_pad
+        A_pad(:) = (/  0.000, &
+                        0.050, &
+                        0.200, &
+                        0.800, &
+                        1.600, &
+                        1.250, &
+                        0.800, &
+                        0.200, &
+                        0.000, &
+                        0.000  /)
+        call D_MPI_BCAST(A_pad,10,0,comm3d,mpierr)
+        deallocate(A_pad)
                                      ! +1=extra room to store bc or staggered variables, velocity on face/pressure in center?
         !allocate(ltree_leaves(2-ih:i1+ih,2-jh:j1+jh,k1))   ! 'true' means leaves
 
@@ -156,18 +168,6 @@ module modtrees
         deallocate(tree_height)
         deallocate(kindex_stem)
 
-        A_pad(10) = (/  0.000, &
-                        0.050, &
-                        0.200, &
-                        0.800, &
-                        1.600, &
-                        1.250, &
-                        0.800, &
-                        0.200, &
-                        0.000, &
-                        0.000  /)
-        call D_MPI_BCAST(A_pad,10,0,comm3d,mpierr)
-
         return ! why? !SvdL, 20231218: ik weet het niet zeker, de fortran beschrijving op internet is er ook niet heel duidelijk over. In feite sluit je hiermee de subroutine af en geef je controle terug aan de routine erboven, maar het statement END SUBROUTINE zou in principe hetzelfde al moeten doen. Dus het lijkt me dubbelop. 
     end subroutine inittrees
 
@@ -177,7 +177,6 @@ module modtrees
     
         if (.not. (lapply_trees)) return
         deallocate(ltree_stem)
-        deallocate(A_pad)
         !deallocate(ltree_leaves)
 
         return
