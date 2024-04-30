@@ -134,7 +134,8 @@ module modtrees
                                 tempj = j
                                 write(6,*) 'i and j are within bounds' 
                             endif 
-                        
+                        endif
+
                         do di = startIdx, endIdx
                             do dj = startIdx, endIdx
                                 ltree_stem(tempi+di,tempj+dj,k) = .true.
@@ -142,8 +143,9 @@ module modtrees
                                             tempi, tempj, k, tempi+di, tempj+dj, tree_height(tempi+myidx*imax,tempj+myidy*jmax), zh(k)
                             end do
                         end do
-
+                    
                     endif
+                    
                 end do  !k
             end do      !j
         end do          !i
