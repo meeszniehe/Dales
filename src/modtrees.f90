@@ -71,7 +71,7 @@ module modtrees
                         0.200, &
                         0.000, &
                         0.000  /)
-        call D_MPI_BCAST(A_pad,10,0,comm3d,mpierr)
+        call excjs(A_pad,10,0,comm3d,mpierr)
         deallocate(A_pad)
                                      ! +1=extra room to store bc or staggered variables, velocity on face/pressure in center?
         !allocate(ltree_leaves(2-ih:i1+ih,2-jh:j1+jh,k1))   ! 'true' means leaves
