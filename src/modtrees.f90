@@ -2,7 +2,7 @@
 !! By Meesz Niehe, email: meesz@niehe.com, TU Delft, section Atmospheric Physics, date 
 
 module modtrees
-    use modtreesdata, only : lapply_trees, lreadfile_trees, ltree_stem, C_stem, A_stem !, ltree_leaves
+    use modtreesdata, only : lapply_trees, lreadfile_trees, ltree_stem, C_stem, A_pad !, ltree_leaves
     use modprecision        
     implicit none
     save
@@ -28,7 +28,7 @@ module modtrees
         integer                 :: tempi, tempj                        !< temporary index for tree_crown creation
         character(100)          :: readstring                       !< read files as text
             
-        namelist/NAMTREES/ lapply_trees, lreadfile_trees, C_stem, A_stem 
+        namelist/NAMTREES/ lapply_trees, lreadfile_trees, C_stem, A_pad 
 
         if(myid==0) then 
             open(ifnamopt,file=fname_options,status='old',iostat=ierr) ! fname_options='namoptions', iostat=0 if operation is successful, otherwise non-zero value
@@ -44,7 +44,7 @@ module modtrees
         if (.not. (lapply_trees)) return
         call D_MPI_BCAST(lreadfile_trees,1,0,comm3d,mpierr)
         call D_MPI_BCAST(C_stem, 1, 0, comm3d, mpierr)
-        call D_MPI_BCAST(A_stem, 1, 0, comm3d, mpierr)
+        call D_MPI_BCAST(A_pad, 1, 0, comm3d, mpierr)
         
         !!! MOVING TREES !!!
         if (abs(cu)>1e-15 .or. abs(cv)>1e-15) then
@@ -175,7 +175,7 @@ module modtrees
         use modfields,      only:   um, vm, wm, e12m, &   !t-1
                                     u0, v0, w0, e120, &   !t
                                     up, vp, wp, e12p    !tendency of ..m
-        use modtreesdata,   only:   lapply_trees, C_stem, A_stem
+        use modtreesdata,   only:   lapply_trees, C_stem, A_pad
         use modmpi,         only:   excjs    
         use modprecision,   only:   field_r
     
@@ -190,11 +190,11 @@ module modtrees
             do j=2,j1
                 do k=1,kmax                 
                     if(ltree_stem(i,j,k)) then   ! could be faster by limiting k to highest tree value?
-                        write(6,*) 'ltree is true for index', i, j, k                        
+                        write(6,*) 'ltree is true for index', i, j, k, ' with A_pad', A_pad(k)                 
                         ! Drag on resolved TKE
                         drag_stem_u = 0 
                         drag_stem_v = 0
-                        call drag_force_stem(C_stem, A_stem, u0(i-1,j,k), v0(i,j-1,k), u0(i,j,k), v0(i,j,k), drag_stem_u, drag_stem_v)
+                        call drag_force_stem(C_stem, A_pad(k), u0(i-1,j,k), v0(i,j-1,k), u0(i,j,k), v0(i,j,k), drag_stem_u, drag_stem_v)
                         ! Reassign the velocity value at the faces adjusted for drag in u and v direction
                         up(i-1,j,k) = up(i-1,j,k) - drag_stem_u/2        ! both sides get half the drag calculated from the middle. 
                         up(i,j,k) = up(i,j,k) - drag_stem_u/2  
@@ -203,7 +203,7 @@ module modtrees
 
                         ! Drag on SFS-TKE
                         drag_SFS = 0
-                        call drag_force_SFS_TKE(C_stem, A_stem, u0(i-1,j,k), v0(i,j-1,k), u0(i,j,k), v0(i,j,k), e120(i,j,k), drag_SFS) ! e120?? 
+                        call drag_force_SFS_TKE(C_stem, A_pad(k), u0(i-1,j,k), v0(i,j-1,k), u0(i,j,k), v0(i,j,k), e120(i,j,k), drag_SFS) ! e120?? 
                         ! use square of e12 or not?
                         write(6,*) e12p(i,j,k)
                         e12p(i,j,k) = e12p(i,j,k) - drag_SFS
@@ -228,13 +228,13 @@ module modtrees
     end subroutine applytrees
 
 
-    subroutine drag_force_SFS_TKE(C_stem, A_stem, u1, v1, u2, v2, e120, drag_SFS) 
+    subroutine drag_force_SFS_TKE(C_stem, A_pad, u1, v1, u2, v2, e120, drag_SFS) 
         ! Drag force on SFS-TKE, take into account direction of surrounding windspeeds as SFS-TKE is a scalar at the cell-center
         implicit none
 
         ! input variables
         real, intent(in) :: C_stem   ! Drag coefficient for stem
-        real, intent(in) :: A_stem   ! Area of stem
+        real, intent(in) :: A_pad   ! Area of stem
         real, intent(in) :: u1,v1,u2,v2 ! velocity component
         real, intent(in) :: e120 ! SFS-TKE (scalar at cell-center)
 
@@ -248,7 +248,7 @@ module modtrees
         u_mag = sqrt((0.5*(u1+u2))**2 + (0.5*(v1+v2))**2)
         
         ! work performed by SFS motions against canopy drag (Patton et al. 2015)
-        drag_SFS = (8/3)*C_stem * A_stem * u_mag * e120
+        drag_SFS = (8/3)*C_stem * A_pad * u_mag * e120
 
     end subroutine drag_force_SFS_TKE
 
@@ -257,12 +257,12 @@ module modtrees
     ! en (2) nu bereken je per i,j,k iteratie de kracht, maar dat houdt ook N^3 functiecalls in. Dat gebeurt in modibm ook, al vraag ik me af of dat inderdaad de beste optie is.. voor nu gewoon later zou ik zeggen.
     ! en (3) de snelheden zijn gegeven op de wanden van de cellen, dus de snelheid in het midden van de zelf is een middeling van deze snelheden. Dat zou eventueel nog geimplemteerd moeten worden (zie onder) 
     !SvdL, 20231218: heb de indentatie deels aangepast.
-    subroutine drag_force_stem(C_stem, A_stem, u1, v1, u2, v2, drag_stem_u, drag_stem_v) ! Calculate drag in centre of cell in u and v direction
+    subroutine drag_force_stem(C_stem, A_pad, u1, v1, u2, v2, drag_stem_u, drag_stem_v) ! Calculate drag in centre of cell in u and v direction
         implicit none
         
         ! Input variables
         real, intent(in) :: C_stem   ! Drag coefficient for stem
-        real, intent(in) :: A_stem   ! Cross-sectional area of the stem
+        real, intent(in) :: A_pad   ! Cross-sectional area of the stem
         real, intent(in) :: u1, v1, u2, v2  ! Velocity components
 
         ! Output variables
@@ -275,11 +275,11 @@ module modtrees
         u_mag = sqrt((0.5*(u1+u2))**2 + (0.5*(v1+v2))**2) !+ (w1+w2)**2)
 
         ! Calculate the drag force components
-        drag_stem_u = C_stem * A_stem * 0.5 * (u1+u2) * u_mag ! 0.5(u1+u2) -> avg in cell center
-        drag_stem_v = C_stem * A_stem * 0.5 * (v1+v2) * u_mag
+        drag_stem_u = C_stem * A_pad * 0.5 * (u1+u2) * u_mag ! 0.5(u1+u2) -> avg in cell center
+        drag_stem_v = C_stem * A_pad * 0.5 * (v1+v2) * u_mag
 
-        !SvdL, 20231218: deze heb ik uitgecommend: vanaf bovenaf gekeken is A_stem niet relevant, maar waarschijnlijk een veel kleiner oppervlak. Ook zal w zelf erg klein zijn.
-        !drag_stem_w = -C_stem * A_stem * w * u_mag
+        !SvdL, 20231218: deze heb ik uitgecommend: vanaf bovenaf gekeken is A_pad niet relevant, maar waarschijnlijk een veel kleiner oppervlak. Ook zal w zelf erg klein zijn.
+        !drag_stem_w = -C_stem * A_pad * w * u_mag
     end subroutine drag_force_stem
 
 end module modtrees
