@@ -22,7 +22,7 @@ module modtrees
                                 D_MPI_ALLREDUCE, mpi_max, MPI_SUM
 
         real(field_r), allocatable :: tree_height(:,:)              !< 2D array to store tree heights at each grid point (x,y), field_r precision?
-        real, dimension(10)     :: A_pad(:)                    
+        real, allocatable       :: A_pad(:)                    
         integer                 :: i, j, k, ierr, ii, jj, kk, n     !< initialize integer to loop over
         integer                 :: startIdx, endIdx, di, dj         !< initialize integer to loop over for tree_crown creation
         integer, allocatable    :: kindex_stem(:,:)                      !< index of stem height
@@ -60,6 +60,7 @@ module modtrees
         allocate(tree_height(itot+1,jtot+1))                ! +1=extra room to store bc or staggered variables, velocity on face/pressure in center?
         allocate(ltree_stem(2-ih:i1+ih,2-jh:j1+jh,k1))      ! 'true' means there is a stem
         allocate(kindex_stem(2-ih:i1+ih,2-jh:j1+jh))
+        allocate(A_pad(10))                                 ! 10=number of elements in A_pad
                                      ! +1=extra room to store bc or staggered variables, velocity on face/pressure in center?
         !allocate(ltree_leaves(2-ih:i1+ih,2-jh:j1+jh,k1))   ! 'true' means leaves
 
@@ -176,6 +177,7 @@ module modtrees
     
         if (.not. (lapply_trees)) return
         deallocate(ltree_stem)
+        deallocate(A_pad)
         !deallocate(ltree_leaves)
 
         return
