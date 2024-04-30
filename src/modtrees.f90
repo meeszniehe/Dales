@@ -21,8 +21,7 @@ module modtrees
         use modmpi,     only :  myid, comm3d, mpierr,  myidx, myidy, d_mpi_bcast, excjs, &
                                 D_MPI_ALLREDUCE, mpi_max, MPI_SUM
 
-        real(field_r), allocatable :: tree_height(:,:)              !< 2D array to store tree heights at each grid point (x,y), field_r precision?
-        real, allocatable       :: A_pad(:)                    
+        real(field_r), allocatable :: tree_height(:,:)              !< 2D array to store tree heights at each grid point (x,y), field_r precision?               
         integer                 :: i, j, k, ierr, ii, jj, kk, n     !< initialize integer to loop over
         integer                 :: startIdx, endIdx, di, dj         !< initialize integer to loop over for tree_crown creation
         integer, allocatable    :: kindex_stem(:,:)                      !< index of stem height
@@ -60,19 +59,6 @@ module modtrees
         allocate(tree_height(itot+1,jtot+1))                ! +1=extra room to store bc or staggered variables, velocity on face/pressure in center?
         allocate(ltree_stem(2-ih:i1+ih,2-jh:j1+jh,k1))      ! 'true' means there is a stem
         allocate(kindex_stem(2-ih:i1+ih,2-jh:j1+jh))
-        allocate(A_pad(10))                                 ! 10=number of elements in A_pad
-        A_pad(:) = (/  0.000, &
-                        0.050, &
-                        0.200, &
-                        0.800, &
-                        1.600, &
-                        1.250, &
-                        0.800, &
-                        0.200, &
-                        0.000, &
-                        0.000  /)
-        call excjs(A_pad,10,0,comm3d,mpierr)
-        deallocate(A_pad)
                                      ! +1=extra room to store bc or staggered variables, velocity on face/pressure in center?
         !allocate(ltree_leaves(2-ih:i1+ih,2-jh:j1+jh,k1))   ! 'true' means leaves
 
@@ -194,21 +180,31 @@ module modtrees
     
         ! Declare local variables
         integer :: i, j, k
-        real :: drag_stem_u, drag_stem_v, drag_SFS, A_padk
+        real :: drag_stem_u, drag_stem_v, drag_SFS
+        real, dimension(10) :: A_pad
 
         if (.not. lapply_trees) return
-    
+        
+        A_pad(:) = (/   0.000, &
+                        0.050, &
+                        0.200, &
+                        0.800, &
+                        1.600, &
+                        1.250, &
+                        0.800, &
+                        0.200, &
+                        0.000, &
+                        0.000  /)
         !!! IMPLEMENTATION DRAG FORCE !!!
         do i=2,i1
             do j=2,j1
                 do k=1,kmax                 
                     if(ltree_stem(i,j,k)) then   ! could be faster by limiting k to highest tree value?
-                        A_padk = A_pad(k)
-                        write(6,*) 'ltree is true for index with A_pad', i, j, k, A_padk                
+                        write(6,*) 'ltree is true for index with A_pad', i, j, k, A_pad(k)                
                         ! Drag on resolved TKE due to 
                         drag_stem_u = 0 
                         drag_stem_v = 0
-                        call drag_force_stem(C_stem, A_padk, u0(i-1,j,k), v0(i,j-1,k), u0(i,j,k), v0(i,j,k), drag_stem_u, drag_stem_v)
+                        call drag_force_stem(C_stem, A_pad(k), u0(i-1,j,k), v0(i,j-1,k), u0(i,j,k), v0(i,j,k), drag_stem_u, drag_stem_v)
                         ! Reassign the velocity value at the faces adjusted for drag in u and v direction
                         up(i-1,j,k) = up(i-1,j,k) - drag_stem_u/2        ! both sides get half the drag calculated from the middle. 
                         up(i,j,k) = up(i,j,k) - drag_stem_u/2  
@@ -217,7 +213,7 @@ module modtrees
 
                         ! Drag on SFS-TKE
                         drag_SFS = 0
-                        call drag_force_SFS_TKE(C_stem, A_padk, u0(i-1,j,k), v0(i,j-1,k), u0(i,j,k), v0(i,j,k), e120(i,j,k), drag_SFS) ! e120?? 
+                        call drag_force_SFS_TKE(C_stem, A_pad(k), u0(i-1,j,k), v0(i,j-1,k), u0(i,j,k), v0(i,j,k), e120(i,j,k), drag_SFS) ! e120?? 
                         ! use square of e12 or not
                         write(6,*) e12p(i,j,k)
                         e12p(i,j,k) = e12p(i,j,k) - drag_SFS
