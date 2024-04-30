@@ -2,7 +2,7 @@
 !! By Meesz Niehe, email: meesz@niehe.com, TU Delft, section Atmospheric Physics, date 
 
 module modtrees
-    use modtreesdata, only : lapply_trees, lreadfile_trees, ltree_stem, C_stem, A_pad !, ltree_leaves
+    use modtreesdata, only : lapply_trees, lreadfile_trees, ltree_stem, C_stem, A_stem !, ltree_leaves
     use modprecision        
     implicit none
     save
@@ -22,13 +22,14 @@ module modtrees
                                 D_MPI_ALLREDUCE, mpi_max, MPI_SUM
 
         real(field_r), allocatable :: tree_height(:,:)              !< 2D array to store tree heights at each grid point (x,y), field_r precision?
+        real, allocatable       :: A_pad(:)                    
         integer                 :: i, j, k, ierr, ii, jj, kk, n     !< initialize integer to loop over
         integer                 :: startIdx, endIdx, di, dj         !< initialize integer to loop over for tree_crown creation
         integer, allocatable    :: kindex_stem(:,:)                      !< index of stem height
         integer                 :: tempi, tempj                        !< temporary index for tree_crown creation
         character(100)          :: readstring                       !< read files as text
             
-        namelist/NAMTREES/ lapply_trees, lreadfile_trees, C_stem, A_pad 
+        namelist/NAMTREES/ lapply_trees, lreadfile_trees, C_stem, A_stem 
 
         if(myid==0) then 
             open(ifnamopt,file=fname_options,status='old',iostat=ierr) ! fname_options='namoptions', iostat=0 if operation is successful, otherwise non-zero value
@@ -44,7 +45,7 @@ module modtrees
         if (.not. (lapply_trees)) return
         call D_MPI_BCAST(lreadfile_trees,1,0,comm3d,mpierr)
         call D_MPI_BCAST(C_stem, 1, 0, comm3d, mpierr)
-        call D_MPI_BCAST(A_pad, 1, 0, comm3d, mpierr)
+        call D_MPI_BCAST(A_stem, 1, 0, comm3d, mpierr)
         
         !!! MOVING TREES !!!
         if (abs(cu)>1e-15 .or. abs(cv)>1e-15) then
@@ -59,12 +60,14 @@ module modtrees
         allocate(tree_height(itot+1,jtot+1))                ! +1=extra room to store bc or staggered variables, velocity on face/pressure in center?
         allocate(ltree_stem(2-ih:i1+ih,2-jh:j1+jh,k1))      ! 'true' means there is a stem
         allocate(kindex_stem(2-ih:i1+ih,2-jh:j1+jh))
+        allocate(A_pad(10))                              ! +1=extra room to store bc or staggered variables, velocity on face/pressure in center?
         !allocate(ltree_leaves(2-ih:i1+ih,2-jh:j1+jh,k1))   ! 'true' means leaves
 
         ! Set default values to zero and false
         tree_height(:,:) = 0
         ltree_stem(:,:,:) = .false.
         kindex_stem(:,:) = 0
+        A_pad(:) = 0
         !ltree_leaves (:,:,:) = .false.
         
         !!! 1D input -> 2D tree_height map !!!
@@ -88,7 +91,16 @@ module modtrees
                 
                 tree_height(1,:)=tree_height(itot+1,:) !< boundary conditions
                 tree_height(:,1)=tree_height(:,jtot+1)
-                
+                A_pad(:) = (/  0.000, &
+                        0.050, &
+                        0.200, &
+                        0.800, &
+                        1.600, &
+                        1.250, &
+                        0.800, &
+                        0.200, &
+                        0.000, &
+                        0.000  /)
                 write(6,*) 'Succesfully read inputfile in modtrees'      
             else 
                 write(6,*) 'No trees.inp file found. Stopping modtrees.'
@@ -97,7 +109,7 @@ module modtrees
         endif !myid==0
         
         call D_MPI_BCAST(tree_height,(itot+1)*(jtot+1),0,comm3d,mpierr)
-
+        call D_MPI_BCAST(A_pad,10,0,comm3d,mpierr)
         !!! INDICATE STEM & LEAF CELLS !!!
         do i=2,i1 ! i1=imax+1
             do j=2,j1
@@ -164,6 +176,7 @@ module modtrees
     
         if (.not. (lapply_trees)) return
         deallocate(ltree_stem)
+        deallocate(A_pad)
         !deallocate(ltree_leaves)
 
         return
@@ -175,7 +188,7 @@ module modtrees
         use modfields,      only:   um, vm, wm, e12m, &   !t-1
                                     u0, v0, w0, e120, &   !t
                                     up, vp, wp, e12p    !tendency of ..m
-        use modtreesdata,   only:   lapply_trees, C_stem, A_pad
+        use modtreesdata,   only:   lapply_trees, C_stem, A_stem
         use modmpi,         only:   excjs    
         use modprecision,   only:   field_r
     

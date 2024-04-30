@@ -9,18 +9,7 @@ module modtreesdata
     logical :: lreadfile_trees = .false.   !< Switch to read tree height data from a file
       
     real        :: C_stem        = 0.264            !< Drag coefficient for stem, based on modcanopy
-    ! real    :: A_stem        = 1            !< Cross-sectional area of the stem
-    real, parameter :: A_pad(10) =  (/ 0.000, &
-                                0.050, &
-                                0.200, &
-                                0.800, &
-                                1.600, &
-                                1.250, &
-                                0.800, &
-                                0.200, &
-                                0.000, &
-                                0.000  /)
-
+    real        :: A_stem        = 1                !< Cross-sectional area of the stem
     ! real    :: C_leaves        = ???            !< Drag coefficient for leaves
     ! real    :: A_leaves        = ???            !< Cross-sectional area of the leaves, value between 0.1-2.0 m2 m−3 depending on season (grylls 2021)
 
