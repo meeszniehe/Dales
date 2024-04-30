@@ -203,7 +203,7 @@ module modtrees
                 do k=1,kmax                 
                     if(ltree_stem(i,j,k)) then   ! could be faster by limiting k to highest tree value?
                         write(6,*) 'ltree is true for index', i, j, k, ' with A_pad', A_pad(k)                 
-                        ! Drag on resolved TKE
+                        ! Drag on resolved TKE due to 
                         drag_stem_u = 0 
                         drag_stem_v = 0
                         call drag_force_stem(C_stem, (k), u0(i-1,j,k), v0(i,j-1,k), u0(i,j,k), v0(i,j,k), drag_stem_u, drag_stem_v)
