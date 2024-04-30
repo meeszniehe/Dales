@@ -105,7 +105,7 @@ module modtrees
                         ! !! Tree is represented by one straight line going straight up !!!!
                         ! ltree_stem(i,j,k) = .true.     ! true/false array to indicate stem cells
                         ! kindex_stem(i,j)   = k + 1     ! werkt niet voor overhangende bladeren/takken
-                        ! write(6,*) 'ltree_stem', i+myidx*imax, j+myidy*jmax, i, j, k, ltree_stem(i,j,k), 
+                        ! write(6,*) 'ltree_stem', i+myidx*imax, j+myidy*jmax, i, j, k, ltree_stem(i,j,k), &
                         !             tree_height(i+myidx*imax,j+myidy*jmax), zh(kindex_stem(i,j))
                         
 
@@ -133,7 +133,7 @@ module modtrees
                         do di = startIdx, endIdx
                             do dj = startIdx, endIdx
                                 ltree_stem(i+di,j+dj,k) = .true.
-                                write(6,*) 'ltree_stem', ltree_stem(i+di,j+dj,k), i+di+myidx*imax,j+di+myidy*jmax, i, j, k, 
+                                write(6,*) 'ltree_stem', ltree_stem(i+di,j+dj,k), i+di+myidx*imax,j+di+myidy*jmax, i, j, k, &
                                             i+di, j+dj, tree_height(i+myidx*imax,j+myidy*jmax), zh(k)
                             end do
                         end do
