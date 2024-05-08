@@ -115,6 +115,7 @@ module modtrees
                         elseif ((k == 2) .OR. (k == 3)) then 
                             startIdx = -1
                             endIdx = 1
+                        endif
                         
                         !!! 128 cubed - treeshape !!!
                         ! if ((k <= 2) .OR. (k == 8)) then ! For the lowest two levels, thickness is 1 grid cell
