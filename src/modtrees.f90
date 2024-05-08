@@ -181,39 +181,39 @@ module modtrees
         ! Declare local variables
         integer :: i, j, k
         real :: drag_stem_u, drag_stem_v, drag_SFS
-        real, dimension(10) :: A_pad
+        ! real, dimension(10) :: A_pad
 
         if (.not. lapply_trees) return
         
-        A_pad(:) = (/   0.000, &
-                        0.050, &
-                        0.200, &
-                        0.800, &
-                        1.600, &
-                        1.250, &
-                        0.800, &
-                        0.200, &
-                        0.000, &
-                        0.000  /)
+        ! A_pad(:) = (/   0.000, &
+        !                 0.050, &
+        !                 0.200, &
+        !                 0.800, &
+        !                 1.600, &
+        !                 1.250, &
+        !                 0.800, &
+        !                 0.200, &
+        !                 0.000, &
+        !                 0.000  /)
         !!! IMPLEMENTATION DRAG FORCE !!!
         do i=2,i1
             do j=2,j1
                 do k=1,kmax                 
                     if(ltree_stem(i,j,k)) then   ! could be faster by limiting k to highest tree value?
-                        write(6,*) 'ltree is true for index with A_pad', i, j, k, A_pad(k)                
+                        write(6,*) 'ltree is true for index', i, j, k               
                         ! Drag on resolved TKE due to 
                         drag_stem_u = 0 
                         drag_stem_v = 0
-                        call drag_force_stem(C_stem, A_pad(k), u0(i-1,j,k), v0(i,j-1,k), u0(i,j,k), v0(i,j,k), drag_stem_u, drag_stem_v)
+                        call drag_force_stem(C_stem, A_stem, u0(i-1,j,k), v0(i,j-1,k), u0(i,j,k), v0(i,j,k), drag_stem_u, drag_stem_v)
                         ! Reassign the velocity value at the faces adjusted for drag in u and v direction
-                        up(i-1,j,k) = up(i-1,j,k) - drag_stem_u/2        ! both sides get half the drag calculated from the middle. 
-                        up(i,j,k) = up(i,j,k) - drag_stem_u/2  
-                        vp(i,j-1,k) = vp(i,j-1,k) - drag_stem_v/2      
-                        vp(i,j,k) = vp(i,j,k) - drag_stem_v/2
+                        up(i-1,j,k) = up(i-1,j,k) + drag_stem_u/2        ! both sides get half the drag calculated from the middle. 
+                        up(i,j,k) = up(i,j,k) + drag_stem_u/2  
+                        vp(i,j-1,k) = vp(i,j-1,k) + drag_stem_v/2      
+                        vp(i,j,k) = vp(i,j,k) + drag_stem_v/2
 
                         ! Drag on SFS-TKE
                         drag_SFS = 0
-                        call drag_force_SFS_TKE(C_stem, A_pad(k), u0(i-1,j,k), v0(i,j-1,k), u0(i,j,k), v0(i,j,k), e120(i,j,k), drag_SFS) ! e120?? 
+                        call drag_force_SFS_TKE(C_stem, A_stem, u0(i-1,j,k), v0(i,j-1,k), u0(i,j,k), v0(i,j,k), e120(i,j,k), drag_SFS) ! e120?? 
                         ! use square of e12 or not
                         write(6,*) e12p(i,j,k)
                         e12p(i,j,k) = e12p(i,j,k) - drag_SFS
@@ -258,7 +258,7 @@ module modtrees
         u_mag = sqrt((0.5*(u1+u2))**2 + (0.5*(v1+v2))**2)
         
         ! work performed by SFS motions against canopy drag (Patton et al. 2015)
-        drag_SFS = (8/3)*C_stem * A_pad * u_mag * e120
+        drag_SFS = -(8/3)*C_stem * A_pad * u_mag * e120
 
     end subroutine drag_force_SFS_TKE
 
@@ -285,8 +285,8 @@ module modtrees
         u_mag = sqrt((0.5*(u1+u2))**2 + (0.5*(v1+v2))**2) !+ (w1+w2)**2)
 
         ! Calculate the drag force components
-        drag_stem_u = C_stem * A_pad * 0.5 * (u1+u2) * u_mag ! 0.5(u1+u2) -> avg in cell center
-        drag_stem_v = C_stem * A_pad * 0.5 * (v1+v2) * u_mag
+        drag_stem_u = - C_stem * A_pad * 0.5 * (u1+u2) * u_mag ! 0.5(u1+u2) -> avg in cell center
+        drag_stem_v = - C_stem * A_pad * 0.5 * (v1+v2) * u_mag
 
         !SvdL, 20231218: deze heb ik uitgecommend: vanaf bovenaf gekeken is A_pad niet relevant, maar waarschijnlijk een veel kleiner oppervlak. Ook zal w zelf erg klein zijn.
         !drag_stem_w = -C_stem * A_pad * w * u_mag
