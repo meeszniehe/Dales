@@ -100,34 +100,36 @@ module modtrees
         !!! INDICATE STEM & LEAF CELLS !!!
         do i=2,i1 ! i1=imax+1
             do j=2,j1
-                do k=2,kmax !
+                do k=1,kmax !
                     if(zf(k).LE.tree_height(i+myidx*imax,j+myidy*jmax)) then  ! obstacle height is above mid point of vertical grid
                         ! !! Tree is represented by one straight line going straight up !!!!
                         ! ltree_stem(i,j,k) = .true.     ! true/false array to indicate stem cells
                         ! kindex_stem(i,j)   = k + 1     ! werkt niet voor overhangende bladeren/takken
                         ! write(6,*) 'ltree_stem', i+myidx*imax, j+myidy*jmax, i, j, k, ltree_stem(i,j,k), &
                         !             tree_height(i+myidx*imax,j+myidy*jmax), zh(kindex_stem(i,j))
-                        
 
                         !!!! Divide tree in smaller stem and thicker crown, same C_d value still !!!!
-                        if (k <= 4) then ! For the lowest two levels, thickness is 1 grid cell
+                        if ((k <= 2) .OR. (k == 8)) then ! For the lowest two levels, thickness is 1 grid cell
                             startIdx = 0
                             endIdx = 0
-                            tempi = i
-                            tempj = j
-                        else ! For higher levels depending on tree height 
+                        elseif ((k == 3) .OR. (k == 7)) then ! For higher levels depending on tree height 
                             startIdx = -1
                             endIdx = 1
+                        elseif ((k >=4) .AND. (k <= 6)) then
+                            startIdx = -2
+                            endIdx = 2
+
                             ! check whether crown stays within domain of (2-imax, 2-jmax) and move tree inward if not
                             ! Is this needed, or does exjcs makes sure ltree=true value is send to adjecent processors?
-                            if ((i == 2) .OR. (j == 2)) then 
-                                tempi = i + 1
-                                tempj = j + 1
-                                write(6,*) 'i or j is 2, moved 1 up'
-                            elseif ((i == imax) .OR. (j == jmax)) then 
-                                tempi = i - 1
-                                tempj = j - 1 
-                                write(6,*) 'i or j is imax or jmax, moved 1 down'   
+                            ! 
+                            if ((i <= 3) .OR. (j <= 3)) then 
+                                tempi = i + 2
+                                tempj = j + 2
+                                write(6,*) 'i or j is too close to bottom, moved 2 up'
+                            elseif ((i >= imax-1) .OR. (j >= jmax-1)) then 
+                                tempi = i - 2
+                                tempj = j - 2 
+                                write(6,*) 'i or j is too close to top, moved 2 down'   
                             else
                                 tempi = i
                                 tempj = j
