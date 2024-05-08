@@ -213,13 +213,13 @@ module modtrees
                         vp(i,j-1,k) = vp(i,j-1,k) + drag_stem_v/2      
                         vp(i,j,k) = vp(i,j,k) + drag_stem_v/2
 
-                        ! Drag on SFS-TKE
-                        drag_SFS = 0
-                        call drag_force_SFS_TKE(C_stem, A_stem, u0(i-1,j,k), v0(i,j-1,k), u0(i,j,k), v0(i,j,k), e120(i,j,k), drag_SFS) ! e120?? 
-                        ! use square of e12 or not
-                        write(6,*) e12p(i,j,k)
-                        e12p(i,j,k) = e12p(i,j,k) - drag_SFS
-                        write(6,*) drag_SFS, e12p(i,j,k), e120(i,j,k)
+                        ! ! Drag on SFS-TKE
+                        ! drag_SFS = 0
+                        ! call drag_force_SFS_TKE(C_stem, A_stem, u0(i-1,j,k), v0(i,j-1,k), u0(i,j,k), v0(i,j,k), e120(i,j,k), drag_SFS) ! e120?? 
+                        ! ! use square of e12 or not
+                        ! write(6,*) e12p(i,j,k)
+                        ! e12p(i,j,k) = e12p(i,j,k) - drag_SFS
+                        ! write(6,*) drag_SFS, e12p(i,j,k), e120(i,j,k)
                         !wp(i,j,k-1) = 0
                         !wp(i,j,k) = 0
                     !elseif (ltree_leaves(i,j,k)) then   ! Drag force due to leaves
