@@ -108,27 +108,38 @@ module modtrees
                         ! write(6,*) 'ltree_stem', i+myidx*imax, j+myidy*jmax, i, j, k, ltree_stem(i,j,k), &
                         !             tree_height(i+myidx*imax,j+myidy*jmax), zh(kindex_stem(i,j))
 
-                        !!!! Divide tree in smaller stem and thicker crown, same C_d value still !!!!
-                        if ((k <= 2) .OR. (k == 8)) then ! For the lowest two levels, thickness is 1 grid cell
+                        !!! 64 cubed - treeshape !!!
+                        if ((k == 1) .OR. (k == 4)) then 
                             startIdx = 0
                             endIdx = 0
-                        elseif ((k == 3) .OR. (k == 7)) then ! For higher levels depending on tree height 
+                        elseif ((k == 2) .OR. (k == 3)) then 
                             startIdx = -1
                             endIdx = 1
-                        elseif ((k >=4) .AND. (k <= 6)) then
-                            startIdx = -2
-                            endIdx = 2
-                        endif
+                        
+                        !!! 128 cubed - treeshape !!!
+                        ! if ((k <= 2) .OR. (k == 8)) then ! For the lowest two levels, thickness is 1 grid cell
+                        !     startIdx = 0
+                        !     endIdx = 0
+                        ! elseif ((k == 3) .OR. (k == 7)) then ! For higher levels depending on tree height 
+                        !     startIdx = -1
+                        !     endIdx = 1
+                        ! elseif ((k >=4) .AND. (k <= 6)) then
+                        !     startIdx = -2
+                        !     endIdx = 2
+                        ! endif
+
+
+
                             ! check whether crown stays within domain of (2-imax, 2-jmax) and move tree inward if not
                             ! Is this needed, or does exjcs makes sure ltree=true value is send to adjecent processors?
                             ! 
-                        if ((i <= 3) .OR. (j <= 3)) then 
-                            tempi = i + 2
-                            tempj = j + 2
+                        if ((i <= 2) .OR. (j <= 2)) then 
+                            tempi = i + 1
+                            tempj = j + 1
                             write(6,*) 'i or j is too close to bottom, moved 2 up'
-                        elseif ((i >= imax-1) .OR. (j >= jmax-1)) then 
-                            tempi = i - 2
-                            tempj = j - 2 
+                        elseif ((i >= imax) .OR. (j >= jmax)) then 
+                            tempi = i - 1
+                            tempj = j - 1 
                             write(6,*) 'i or j is too close to top, moved 2 down'   
                         else
                             tempi = i
