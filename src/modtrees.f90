@@ -118,25 +118,24 @@ module modtrees
                         elseif ((k >=4) .AND. (k <= 6)) then
                             startIdx = -2
                             endIdx = 2
-
+                        endif
                             ! check whether crown stays within domain of (2-imax, 2-jmax) and move tree inward if not
                             ! Is this needed, or does exjcs makes sure ltree=true value is send to adjecent processors?
                             ! 
-                            if ((i <= 3) .OR. (j <= 3)) then 
-                                tempi = i + 2
-                                tempj = j + 2
-                                write(6,*) 'i or j is too close to bottom, moved 2 up'
-                            elseif ((i >= imax-1) .OR. (j >= jmax-1)) then 
-                                tempi = i - 2
-                                tempj = j - 2 
-                                write(6,*) 'i or j is too close to top, moved 2 down'   
-                            else
-                                tempi = i
-                                tempj = j
-                                write(6,*) 'i and j are within bounds' 
-                            endif 
-                        endif
-
+                        if ((i <= 3) .OR. (j <= 3)) then 
+                            tempi = i + 2
+                            tempj = j + 2
+                            write(6,*) 'i or j is too close to bottom, moved 2 up'
+                        elseif ((i >= imax-1) .OR. (j >= jmax-1)) then 
+                            tempi = i - 2
+                            tempj = j - 2 
+                            write(6,*) 'i or j is too close to top, moved 2 down'   
+                        else
+                            tempi = i
+                            tempj = j
+                            write(6,*) 'i and j are within bounds' 
+                        endif 
+                        
                         do di = startIdx, endIdx
                             do dj = startIdx, endIdx
                                 ltree_stem(tempi+di,tempj+dj,k) = .true.
