@@ -100,7 +100,7 @@ module modtrees
         !!! INDICATE STEM & LEAF CELLS !!!
         do i=2,i1 ! i1=imax+1
             do j=2,j1
-                do k=2,kmax !
+                do k=3,kmax !
                     if(zf(k).LE.tree_height(i+myidx*imax,j+myidy*jmax)) then  ! obstacle height is above mid point of vertical grid
                         ! !! Tree is represented by one straight line going straight up !!!!
                         ! ltree_stem(i,j,k) = .true.     ! true/false array to indicate stem cells
@@ -142,19 +142,19 @@ module modtrees
                         ! endif
                         
                         !! 256 cubed - treeshape !!!
-                        if ((k <= 5) .OR. (k == 16)) then ! For the lowest two levels, thickness is 1 grid cell
+                        if ((k <= 5) .OR. (k == 15)) then ! For the lowest two levels, thickness is 1 grid cell
                             startIdx = 0
                             endIdx = 0
-                        elseif ((k == 6) .OR. (k == 14)) then ! For higher levels depending on tree height 
+                        elseif ((k == 6) .OR. (k == 13)) then ! For higher levels depending on tree height 
                             startIdx = -2
                             endIdx = 2
-                        elseif ((k ==7) .AND. (k == 13)) then
+                        elseif ((k ==7) .AND. (k == 12)) then
                             startIdx = -3
                             endIdx = 3
-                        elseif ((k >= 8 ) .AND. (k <= 12)) then
+                        elseif ((k >= 8 ) .AND. (k <= 11)) then
                             startIdx = -4 
                             endIdx = 4
-                        elseif (k == 15) then
+                        elseif (k == 14) then
                             startIdx = -1
                             endIdx = 1
                         endif
