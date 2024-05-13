@@ -110,10 +110,10 @@ module modtrees
 
 
                         !!! 32 cubed - straight line !!!
-                        startIdx = 0
-                        endIdx = 0
-                        tempi = i
-                        tempj = j
+                        ! startIdx = 0
+                        ! endIdx = 0
+                        ! tempi = i
+                        ! tempj = j
 
                         ! !!! 64 cubed - treeshape !!!
                         ! if ((k == 1) .OR. (k == 4)) then 
@@ -135,25 +135,41 @@ module modtrees
                         !     startIdx = -2
                         !     endIdx = 2
                         ! endif
-
-
+                        
+                        !! 256 cubed - treeshape !!!
+                        if ((k <= 5) .OR. (k == 16)) then ! For the lowest two levels, thickness is 1 grid cell
+                            startIdx = 0
+                            endIdx = 0
+                        elseif ((k == 6) .OR. (k == 14)) then ! For higher levels depending on tree height 
+                            startIdx = -2
+                            endIdx = 2
+                        elseif ((k ==7) .AND. (k == 13)) then
+                            startIdx = -3
+                            endIdx = 3
+                        elseif ((k >= 8 ) .AND. (k <= 12)) then
+                            startIdx = -4 
+                            endIdx = 4
+                        elseif (k == 15) then
+                            startIdx = -1
+                            endIdx = 1
+                        endif
 
                             ! check whether crown stays within domain of (2-imax, 2-jmax) and move tree inward if not
                             ! Is this needed, or does exjcs makes sure ltree=true value is send to adjecent processors?
                             ! 
-                        ! if ((i <= 2) .OR. (j <= 2)) then 
-                        !     tempi = i + 1
-                        !     tempj = j + 1
-                        !     write(6,*) 'i or j is too close to bottom, moved 2 up'
-                        ! elseif ((i >= imax) .OR. (j >= jmax)) then 
-                        !     tempi = i - 1
-                        !     tempj = j - 1 
-                        !     write(6,*) 'i or j is too close to top, moved 2 down'   
-                        ! else
-                        !     tempi = i
-                        !     tempj = j
-                        !     write(6,*) 'i and j are within bounds' 
-                        ! endif 
+                        if ((i <= 5) .OR. (j <= 5)) then 
+                            tempi = i + 5
+                            tempj = j + 5
+                            write(6,*) 'i or j is too close to bottom, moved 2 up'
+                        elseif ((i >= imax-5) .OR. (j >= jmax-5)) then 
+                            tempi = i - 5
+                            tempj = j - 5
+                            write(6,*) 'i or j is too close to top, moved 2 down'   
+                        else
+                            tempi = i
+                            tempj = j
+                            write(6,*) 'i and j are within bounds' 
+                        endif 
                         
                         do di = startIdx, endIdx
                             do dj = startIdx, endIdx
@@ -220,7 +236,7 @@ module modtrees
             do j=2,j1
                 do k=1,kmax                 
                     if(ltree_stem(i,j,k)) then   ! could be faster by limiting k to highest tree value?
-                        write(6,*) 'ltree is true for index', i, j, k               
+                        ! write(6,*) 'ltree is true for index', i, j, k               
                         ! Drag on resolved TKE due to 
                         drag_stem_u = 0 
                         drag_stem_v = 0
@@ -235,9 +251,9 @@ module modtrees
                         drag_SFS = 0
                         call drag_force_SFS_TKE(C_stem, A_stem, u0(i-1,j,k), v0(i,j-1,k), u0(i,j,k), v0(i,j,k), e120(i,j,k), drag_SFS) ! e120?? 
                         ! use square of e12 or not
-                        write(6,*) e12p(i,j,k)
+                        ! write(6,*) e12p(i,j,k)
                         e12p(i,j,k) = e12p(i,j,k) - drag_SFS
-                        write(6,*) drag_SFS, e12p(i,j,k), e120(i,j,k)
+                        ! write(6,*) drag_SFS, e12p(i,j,k), e120(i,j,k)
                         !wp(i,j,k-1) = 0
                         !wp(i,j,k) = 0
                     !elseif (ltree_leaves(i,j,k)) then   ! Drag force due to leaves
@@ -253,7 +269,7 @@ module modtrees
         call excjs(up,2,i1,2,j1,1,k1,ih,jh)
         call excjs(vp,2,i1,2,j1,1,k1,ih,jh)
         !call excjs(wp,2,i1,2,j1,1,k1,ih,jh)
-        write(6,* ) 'applytrees succesfull'
+        ! write(6,* ) 'applytrees succesfull'
         return
     end subroutine applytrees
 
