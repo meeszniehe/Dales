@@ -100,7 +100,7 @@ module modtrees
         !!! INDICATE STEM & LEAF CELLS !!!
         do i=2,i1 ! i1=imax+1
             do j=2,j1
-                do k=1,kmax !
+                do k=3,kmax !
                     if(zf(k).LE.tree_height(i+myidx*imax,j+myidy*jmax)) then  ! obstacle height is above mid point of vertical grid
                         ! !! Tree is represented by one straight line going straight up !!!!
                         ! ltree_stem(i,j,k) = .true.     ! true/false array to indicate stem cells
