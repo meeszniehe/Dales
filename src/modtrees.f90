@@ -100,7 +100,7 @@ module modtrees
         !!! INDICATE STEM & LEAF CELLS !!!
         do i=2,i1 ! i1=imax+1
             do j=2,j1
-                do k=3,kmax !
+                do k=2,kmax !
                     if(zf(k).LE.tree_height(i+myidx*imax,j+myidy*jmax)) then  ! obstacle height is above mid point of vertical grid
                         ! !! Tree is represented by one straight line going straight up !!!!
                         ! ltree_stem(i,j,k) = .true.     ! true/false array to indicate stem cells
@@ -108,11 +108,11 @@ module modtrees
                         ! write(6,*) 'ltree_stem', i+myidx*imax, j+myidy*jmax, i, j, k, ltree_stem(i,j,k), &
                         !             tree_height(i+myidx*imax,j+myidy*jmax), zh(kindex_stem(i,j))
                         
-                        ! !!! 3x3x4 tree
-                        ! startIdx = -1
-                        ! endIdx = 1
-                        ! tempi = i
-                        ! tempj = j
+                        !!! 3x3x4 tree
+                        startIdx = -1
+                        endIdx = 1
+                        tempi = i
+                        tempj = j
 
                         !!! 32 cubed - straight line !!!
                         ! startIdx = 0
@@ -141,40 +141,40 @@ module modtrees
                         !     endIdx = 2
                         ! endif
                         
-                        !! 256 cubed - treeshape !!!
-                        if ((k <= 5) .OR. (k == 15)) then ! For the lowest two levels, thickness is 1 grid cell
-                            startIdx = 0
-                            endIdx = 0
-                        elseif ((k == 6) .OR. (k == 13)) then ! For higher levels depending on tree height 
-                            startIdx = -2
-                            endIdx = 2
-                        elseif ((k ==7) .AND. (k == 12)) then
-                            startIdx = -3
-                            endIdx = 3
-                        elseif ((k >= 8 ) .AND. (k <= 11)) then
-                            startIdx = -4 
-                            endIdx = 4
-                        elseif (k == 14) then
-                            startIdx = -1
-                            endIdx = 1
-                        endif
+                        ! !! 256 cubed - treeshape !!!
+                        ! if ((k <= 5) .OR. (k == 15)) then ! For the lowest two levels, thickness is 1 grid cell
+                        !     startIdx = 0
+                        !     endIdx = 0
+                        ! elseif ((k == 6) .OR. (k == 13)) then ! For higher levels depending on tree height 
+                        !     startIdx = -2
+                        !     endIdx = 2
+                        ! elseif ((k ==7) .AND. (k == 12)) then
+                        !     startIdx = -3
+                        !     endIdx = 3
+                        ! elseif ((k >= 8 ) .AND. (k <= 11)) then
+                        !     startIdx = -4 
+                        !     endIdx = 4
+                        ! elseif (k == 14) then
+                        !     startIdx = -1
+                        !     endIdx = 1
+                        ! endif
 
                             ! check whether crown stays within domain of (2-imax, 2-jmax) and move tree inward if not
                             ! Is this needed, or does exjcs makes sure ltree=true value is send to adjecent processors?
                             ! 
-                        if ((i <= 5) .OR. (j <= 5)) then 
-                            tempi = i + 5
-                            tempj = j + 5
-                            write(6,*) 'i or j is too close to bottom, moved 2 up'
-                        elseif ((i >= imax-5) .OR. (j >= jmax-5)) then 
-                            tempi = i - 5
-                            tempj = j - 5
-                            write(6,*) 'i or j is too close to top, moved 2 down'   
-                        else
-                            tempi = i
-                            tempj = j
-                            write(6,*) 'i and j are within bounds' 
-                        endif 
+                        ! if ((i <= 5) .OR. (j <= 5)) then 
+                        !     tempi = i + 5
+                        !     tempj = j + 5
+                        !     write(6,*) 'i or j is too close to bottom, moved 2 up'
+                        ! elseif ((i >= imax-5) .OR. (j >= jmax-5)) then 
+                        !     tempi = i - 5
+                        !     tempj = j - 5
+                        !     write(6,*) 'i or j is too close to top, moved 2 down'   
+                        ! else
+                        !     tempi = i
+                        !     tempj = j
+                        !     write(6,*) 'i and j are within bounds' 
+                        ! endif 
                         
                         do di = startIdx, endIdx
                             do dj = startIdx, endIdx
