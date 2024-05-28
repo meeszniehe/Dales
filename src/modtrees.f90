@@ -109,16 +109,16 @@ module modtrees
                         !             tree_height(i+myidx*imax,j+myidy*jmax), zh(kindex_stem(i,j))
                         
                         !!! 3x3x4 tree
-                        startIdx = -1
-                        endIdx = 1
-                        tempi = i
-                        tempj = j
-
-                        !!! 32 cubed - straight line !!!
-                        ! startIdx = 0
-                        ! endIdx = 0
+                        ! startIdx = -1
+                        ! endIdx = 1
                         ! tempi = i
                         ! tempj = j
+
+                        !! 32 cubed - straight line !!!
+                        startIdx = 0
+                        endIdx = 0
+                        tempi = i
+                        tempj = j
 
                         ! !!! 64 cubed - treeshape !!!
                         ! if ((k == 1) .OR. (k == 4)) then 
