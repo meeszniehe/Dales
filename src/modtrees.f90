@@ -2,7 +2,7 @@
 !! By Meesz Niehe, email: meesz@niehe.com, TU Delft, section Atmospheric Physics 
 
 module modtrees
-    use modtreesdata, only : lapply_treedrag, lreadfile_trees, lapply_sourceSGS, ltree, Cd, A_stem
+    use modtreesdata, only : lapply_treedrag, lreadfile_trees, lapply_sourceSGS, ltree, Cd, A_pad
     use modprecision        
     implicit none
     save
@@ -24,11 +24,11 @@ module modtrees
         real(field_r), allocatable :: tree_height(:,:)              !< 2D array to store tree heights at each grid point (x,y)             
         integer                 :: i, j, k, ierr, ii, jj, kk, n     !< initialize integer to loop over
         integer                 :: startIdx, endIdx, di, dj         !< initialize integer to loop over for tree_crown creation
-        integer, allocatable    :: kindex_tree(:,:)                 !< index of stem height
+        integer, allocatable    :: kindex_tree(:,:)                 !< index of tree height
         integer                 :: tempi, tempj                     !< temporary index for creating tree shape
         character(100)          :: readstring                       !< read files as text
             
-        namelist/NAMTREES/ lapply_treedrag, lreadfile_trees, lapply_sourceSGS, Cd, A_stem 
+        namelist/NAMTREES/ lapply_treedrag, lreadfile_trees, lapply_sourceSGS, Cd, A_pad 
 
         if (myid==0) then 
             open(ifnamopt,file=fname_options,status='old',iostat=ierr) ! fname_options='namoptions', iostat=0 if operation is successful, otherwise non-zero value
@@ -44,7 +44,7 @@ module modtrees
         call D_MPI_BCAST(lreadfile_trees,1,0,comm3d,mpierr)
         call D_MPI_BCAST(lapply_sourceSGS,1,0,comm3d,mpierr)
         call D_MPI_BCAST(Cd, 1, 0, comm3d, mpierr)
-        call D_MPI_BCAST(A_stem, 1, 0, comm3d, mpierr)
+        call D_MPI_BCAST(A_pad, 1, 0, comm3d, mpierr)
         
         if (abs(cu)>1e-15 .or. abs(cv)>1e-15) then
             if(myid==0) print *, 'Problem in namoptions'
@@ -184,8 +184,8 @@ module modtrees
         implicit none
 
         ! input variables
-        real, intent(in) :: Cd              ! Drag coefficient for stem
-        real, intent(in) :: A_pad           ! Area of stem
+        real, intent(in) :: Cd              ! Drag coefficient for tree
+        real, intent(in) :: A_pad           ! Plant area density
         real, intent(in) :: u1,v1,u2,v2     ! velocity component
         real, intent(in) :: e120            ! SGS-TKE (scalar at cell-center)
 
@@ -205,8 +205,8 @@ module modtrees
         implicit none
         
         ! Input variables
-        real, intent(in) :: Cd              ! Drag coefficient for stem
-        real, intent(in) :: A_pad           ! Cross-sectional area of the stem
+        real, intent(in) :: Cd              ! Drag coefficient for tree
+        real, intent(in) :: A_pad           ! Plant area density
         real, intent(in) :: u1, v1, u2, v2  ! Velocity components
 
         ! Output variables1
