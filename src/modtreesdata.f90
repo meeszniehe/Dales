@@ -5,16 +5,12 @@ module modtreesdata
     save
   
     ! Global settings
-    logical :: lapply_trees = .false.       !< Switch to enable tree method
-    logical :: lreadfile_trees = .false.   !< Switch to read tree height data from a file
-      
-    real        :: C_stem        = 0.264            !< Drag coefficient for stem, based on modcanopy
-    real        :: A_stem        = 1                !< Cross-sectional area of the stem
-    ! real    :: C_leaves        = ???            !< Drag coefficient for leaves
-    ! real    :: A_leaves        = ???            !< Cross-sectional area of the leaves, value between 0.1-2.0 m2 m−3 depending on season (grylls 2021)
+    logical :: lapply_treedrag = .false.    !< Switch to enable tree method
+    logical :: lreadfile_trees = .false.    !< Switch to read tree height data from a file
+    logical :: lapply_sourceSGS = .false.   !< Switch to apply source SGS model
+    real        :: Cd        = 0.264        !< Drag coefficient tree (taken from modcanopy?)
+    real        :: A_pad        = 1         !< Cross-sectional area
 
-    logical, allocatable    :: ltree_stem(:,:,:)                !< true/false array to indicate stem cells, !SvdL, 20231218: als het een true/false array moet zijn, moet je hem als logical declareren
-    !logical, allocatable    :: ltree_leaves(:,:,:)
-    
+    logical, allocatable    :: ltree(:,:,:)                !< true/false array to indicate stem cells
 end module modtreesdata
 
