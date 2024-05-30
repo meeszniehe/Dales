@@ -163,9 +163,9 @@ module modtrees
                         if (lapply_sourceSGS) then
                             source_SGS = 0
                             call source_SGS_TKE(Cd, A_pad, u0(i-1, j, k), v0(i, j-1, k), u0(i, j, k), v0(i, j, k), e120(i, j, k), source_SGS)
-                            write(6,*) e12p(i, j, k)
+                            ! write(6,*) e12p(i, j, k)
                             e12p(i, j, k) = e12p(i, j, k) + source_SGS
-                            write(6,*) source_SGS, e12p(i, j, k), e120(i, j, k)
+                            ! write(6,*) source_SGS, e12p(i, j, k), e120(i, j, k)
                         endif    
                     endif
                 end do
