@@ -160,7 +160,7 @@ module modtrees
                         vp(i,j,k) = vp(i,j,k) + treedrag_v/2
 
                         !!! Source for SGS-TKE !!!
-                        if (lapply_sourceSGS .AND. (k >= 2)) then
+                        if (lapply_sourceSGS .AND. (k >= 2)) then ! for k=1 run doesnt work, SGS-TKE explodes at surface
                             source_SGS = 0
                             call source_SGS_TKE(Cd, A_pad, u0(i-1, j, k), v0(i, j-1, k), u0(i, j, k), v0(i, j, k), e120(i, j, k), source_SGS)
                             ! write(6,*) e12p(i, j, k)
