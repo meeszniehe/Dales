@@ -196,7 +196,7 @@ module modtrees
         real :: u_mag                       ! magnitude of the velocity vector
 
         u_mag = sqrt((0.5*(u1+u2))**2 + (0.5*(v1+v2))**2)   ! Magnitude of the velocity vector at centre of gridcell
-        source_SGS = (8/3)*Cd * A_pad * u_mag * e120       
+        source_SGS = -(8/3)*Cd * A_pad * u_mag * e120       
 
     end subroutine source_SGS_TKE
 
