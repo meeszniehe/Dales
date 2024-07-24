@@ -97,6 +97,7 @@ module modtrees
                 do k=1,kmax !
                     if(zf(k).LE.tree_height(i+myidx*imax,j+myidy*jmax)) then  ! obstacle height is above mid point of vertical grid                        
                         ! Part below created to grow tree shapes from 2D tree_height map to model overhanging parts 
+                        ! add height constraints
                         startIdx = 0 
                         endIdx = 0
                         tempi = i
