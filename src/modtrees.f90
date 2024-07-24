@@ -2,7 +2,7 @@
 !! By Meesz Niehe, email: meesz@niehe.com, TU Delft, section Atmospheric Physics 
 
 module modtrees
-    use modtreesdata, only : lapply_treedrag, lreadfile_trees, lapply_sourceSGS, ltree, Cd, A_pad
+    use modtreesdata, only : lapply_treedrag, lreadfile_trees, lapply_SGSdrag, ltree, Cd, A_pad
     use modprecision        
     implicit none
     save
@@ -28,7 +28,7 @@ module modtrees
         integer                 :: tempi, tempj                     !< temporary index for creating tree shape
         character(100)          :: readstring                       !< read files as text
             
-        namelist/NAMTREES/ lapply_treedrag, lreadfile_trees, lapply_sourceSGS, Cd, A_pad 
+        namelist/NAMTREES/ lapply_treedrag, lreadfile_trees, lapply_SGSdrag, Cd, A_pad 
 
         if (myid==0) then 
             open(ifnamopt,file=fname_options,status='old',iostat=ierr) ! fname_options='namoptions', iostat=0 if operation is successful, otherwise non-zero value
@@ -42,7 +42,7 @@ module modtrees
         call D_MPI_BCAST(lapply_treedrag,1,0,comm3d,mpierr) ! 1=onevalue, mpierr=checkforerrors
         if (.not. (lapply_treedrag)) return
         call D_MPI_BCAST(lreadfile_trees,1,0,comm3d,mpierr)
-        call D_MPI_BCAST(lapply_sourceSGS,1,0,comm3d,mpierr)
+        call D_MPI_BCAST(lapply_SGSdrag,1,0,comm3d,mpierr)
         call D_MPI_BCAST(Cd, 1, 0, comm3d, mpierr)
         call D_MPI_BCAST(A_pad, 1, 0, comm3d, mpierr)
         
@@ -96,7 +96,7 @@ module modtrees
             do j=2,j1
                 do k=1,kmax !
                     if(zf(k).LE.tree_height(i+myidx*imax,j+myidy*jmax)) then  ! obstacle height is above mid point of vertical grid                        
-                        ! Part below created to grow tree shapes from 2D tree_height map to model overhanging parts
+                        ! Part below created to grow tree shapes from 2D tree_height map to model overhanging parts 
                         startIdx = 0 
                         endIdx = 0
                         tempi = i
@@ -137,13 +137,13 @@ module modtrees
         use modfields,      only:   um, vm, wm, e12m, &   !t-1
                                     u0, v0, w0, e120, &   !t
                                     up, vp, wp, e12p    !tendency of ..m
-        use modtreesdata,   only:   lapply_treedrag, lapply_sourceSGS, Cd, A_pad
+        use modtreesdata,   only:   lapply_treedrag, lapply_SGSdrag, Cd, A_pad
         use modmpi,         only:   excjs    
         use modprecision,   only:   field_r
     
         ! Declare local variables
         integer :: i, j, k
-        real :: treedrag_u, treedrag_v, source_SGS
+        real :: treedrag_u, treedrag_v, SGS_drag
 
         if (.not. lapply_treedrag) return
         do i=2,i1
@@ -159,13 +159,13 @@ module modtrees
                         vp(i,j-1,k) = vp(i,j-1,k) + treedrag_v/2      
                         vp(i,j,k) = vp(i,j,k) + treedrag_v/2
 
-                        !!! Source for SGS-TKE !!!
-                        if (lapply_sourceSGS .AND. (k >= 2)) then ! for k=1 run doesnt work, SGS-TKE explodes at surface
-                            source_SGS = 0
-                            call source_SGS_TKE(Cd, A_pad, u0(i-1, j, k), v0(i, j-1, k), u0(i, j, k), v0(i, j, k), e120(i, j, k), source_SGS)
+                        !!! Drag on SGS !!!
+                        if (lapply_SGSdrag .AND. (k >= 2)) then ! for k=1 run doesnt work, SGS-TKE explodes at surface
+                            SGS_drag = 0
+                            call SGS_treedrag(Cd, A_pad, u0(i-1, j, k), v0(i, j-1, k), u0(i, j, k), v0(i, j, k), e120(i, j, k), SGS_drag)
                             ! write(6,*) e12p(i, j, k)
-                            e12p(i, j, k) = e12p(i, j, k) + source_SGS
-                            ! write(6,*) source_SGS, e12p(i, j, k), e120(i, j, k)
+                            e12p(i, j, k) = e12p(i, j, k) + SGS_drag
+                            ! write(6,*) SGS_drag, e12p(i, j, k), e120(i, j, k)
                         endif    
                     endif
                 end do
@@ -180,7 +180,7 @@ module modtrees
     end subroutine applytrees
 
 
-    subroutine source_SGS_TKE(Cd, A_pad, u1, v1, u2, v2, e120, source_SGS) ! Drag is overestimated, so sourceterm in SGS to compensate (Patton et al. 2015)
+    subroutine SGS_treedrag(Cd, A_pad, u1, v1, u2, v2, e120, SGS_drag) ! Drag is overestimated, so sourceterm in SGS to compensate (Patton et al. 2015)
         implicit none
 
         ! input variables
@@ -190,15 +190,15 @@ module modtrees
         real, intent(in) :: e120            ! SGS-TKE (scalar at cell-center)
 
         ! output variables
-        real, intent(out) :: source_SGS     ! set to zero before call in applytrees
+        real, intent(out) :: SGS_drag     ! set to zero before call in applytrees
 
         ! Local variables 
         real :: u_mag                       ! magnitude of the velocity vector
 
         u_mag = sqrt((0.5*(u1+u2))**2 + (0.5*(v1+v2))**2)   ! Magnitude of the velocity vector at centre of gridcell
-        source_SGS = -(8/3)*Cd * A_pad * u_mag * e120       
+        SGS_drag = -(8/3)*Cd * A_pad * u_mag * e120       
 
-    end subroutine source_SGS_TKE
+    end subroutine SGS_treedrag
 
     
     subroutine F_treedrag(Cd, A_pad, u1, v1, u2, v2, treedrag_u, treedrag_v) ! Calculate drag in centre of cell in u and v direction
